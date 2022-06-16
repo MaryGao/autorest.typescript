@@ -8,6 +8,27 @@ import { NameType, normalizeName } from "../../utils/nameUtils";
 import { getLanguageMetadata } from "../../utils/languageHelpers";
 import { transformBaseUrl } from "../../transforms/urlTransforms";
 
+export type Method = "get" | "post" | "patch" | "put" | "delete";
+
+export interface SampleGroup {
+    sampleFileName: string,
+    clientClassName: string,
+    clientPackageName: string,
+    samples: SampleDetails[],
+    importedTypes?: string[],
+}
+
+export interface SampleDetails {
+    name: string,
+    description: string,
+    originalFileLocation?: string,
+    clientParameters: string[],
+    pathParameters: string[],
+    method: Method;
+    isLRO: boolean,
+    isPaging: boolean,
+}
+
 export function generateRLCSamples(model: TestCodeModel, project: Project) {
     const {
         generateSample,
