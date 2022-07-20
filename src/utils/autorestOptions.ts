@@ -41,6 +41,7 @@ export async function extractAutorestOptions(): Promise<AutorestOptions> {
   const coreHttpCompatMode = await getCoreHttpCompatMode(host);
   const azureSdkForJs = await getAzureSdkForJs(host);
   const dependencyInfo = await getDependencyInfo(host);
+  const generateSampleForAPIExplorer = await getGeneratedSampleForAPIExplorer(host);
 
   return {
     azureArm,
@@ -73,7 +74,8 @@ export async function extractAutorestOptions(): Promise<AutorestOptions> {
     azureSdkForJs,
     productDocLink,
     coreHttpCompatMode,
-    dependencyInfo
+    dependencyInfo,
+    generateSampleForAPIExplorer
   };
 }
 
@@ -276,7 +278,7 @@ export async function getSecurityScopes(
   host: AutorestExtensionHost
 ): Promise<string[] | undefined> {
   const securityScopes: string | undefined = await host.getValue("security-scopes");
-  if(securityScopes !== undefined && typeof securityScopes === "string") {
+  if (securityScopes !== undefined && typeof securityScopes === "string") {
     return securityScopes.split(",");
   }
   return securityScopes;
@@ -350,3 +352,7 @@ async function getDependencyInfo(
     "Invalid dependency-info. Make sure that link and description are defined"
   );
 }
+async function getGeneratedSampleForAPIExplorer(host: AutorestExtensionHost) {
+  return (await host.getValue("generate-sample-for-apiexplorer") === false) ? false : true;
+}
+

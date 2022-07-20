@@ -61,7 +61,7 @@ export async function getAllExamples(
   clientDetails: ClientDetails
 ) {
   const operationGroupDetails = clientDetails.operationGroups;
-  const { packageDetails } = getAutorestOptions();
+  const { packageDetails, generateSampleForAPIExplorer } = getAutorestOptions();
   const session = getSession();
   let examplesModels: SampleGroup[] = [];
   if (codeModel?.testModel?.mockTest?.exampleGroups !== undefined) {
@@ -187,7 +187,7 @@ export async function getAllExamples(
               let bodySchemaName = parameterTypeName;
               if (
                 methodParameter.exampleValue.schema.type ===
-                  SchemaType.AnyObject ||
+                SchemaType.AnyObject ||
                 methodParameter.exampleValue.schema.type === SchemaType.Any
               ) {
                 bodySchemaName = "Record<string, unknown>";
@@ -243,7 +243,12 @@ export async function getAllExamples(
       if (sampleGroup.samples.length > 0) {
         // enrich the importedTypes after all examples resolved
         sampleGroup.importedTypes = Array.from(importedTypeSet);
-        examplesModels.push(sampleGroup);
+        if (generateSampleForAPIExplorer && sampleGroup.samples.length > 1) {
+          flatt
+        } else {
+          examplesModels.push(sampleGroup);
+        }
+
       }
     }
   }
