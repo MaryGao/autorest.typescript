@@ -28,6 +28,7 @@ export function generateHLCSamples(
   // Toplevel operations are inlined in the client
   const sampleGroups = clientDetails.samples;
   const session = getSession();
+  const { generateSampleForAPIExplorer } = getAutorestOptions();
   if (!sampleGroups) {
     session.error("No samples are found! ", []);
   }
@@ -38,7 +39,8 @@ export function generateHLCSamples(
       });
 
       const sampleGroupFileContents = hbs.compile(file, { noEscape: true });
-      project.createSourceFile(`samples-dev/${sampleGroup.sampleFileName}.ts`, sampleGroupFileContents(sampleGroup), {
+      const filename = generateSampleForAPIExplorer ? `samples-dev/${sampleGroup.samples[0].sampleDetailFileName}.ts` : `samples-dev/${sampleGroup.sampleFileName}.ts`;
+      project.createSourceFile(filename, sampleGroupFileContents(sampleGroup), {
         overwrite: true
       });
     } catch (error) {

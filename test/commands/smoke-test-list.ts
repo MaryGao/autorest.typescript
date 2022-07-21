@@ -77,7 +77,7 @@ export const readmes: SpecDefinition[] = [
       AutorestParams.AzureSdkForJs
     ],
     branch: "925e8285703ddd461588d8f5fbf14bd97c286fab",
-    buildTag: "ci_2"
+    buildTag: "debug"
   },
   {
     path: joinPath(

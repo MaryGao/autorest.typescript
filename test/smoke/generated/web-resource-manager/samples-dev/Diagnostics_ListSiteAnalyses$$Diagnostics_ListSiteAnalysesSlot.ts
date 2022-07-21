@@ -15,32 +15,6 @@ import { DefaultAzureCredential } from "@azure/identity";
  * This sample demonstrates how to Description for Get Site Analyses
  *
  * @summary Description for Get Site Analyses
- * x-ms-original-file: specification/web/resource-manager/Microsoft.Web/stable/2021-02-01/examples/Diagnostics_ListSiteAnalyses.json
- */
-async function listAppAnalyses() {
-  const subscriptionId = "34adfa4f-cedf-4dc0-ba29-b6d1a69ab345";
-  const resourceGroupName = "Sample-WestUSResourceGroup";
-  const siteName = "SampleApp";
-  const diagnosticCategory = "availability";
-  const credential = new DefaultAzureCredential();
-  const client = new WebSiteManagementClient(credential, subscriptionId);
-  const resArray = new Array();
-  for await (let item of client.diagnostics.listSiteAnalyses(
-    resourceGroupName,
-    siteName,
-    diagnosticCategory
-  )) {
-    resArray.push(item);
-  }
-  console.log(resArray);
-}
-
-listAppAnalyses().catch(console.error);
-
-/**
- * This sample demonstrates how to Description for Get Site Analyses
- *
- * @summary Description for Get Site Analyses
  * x-ms-original-file: specification/web/resource-manager/Microsoft.Web/stable/2021-02-01/examples/Diagnostics_ListSiteAnalysesSlot.json
  */
 async function listAppSlotAnalyses() {

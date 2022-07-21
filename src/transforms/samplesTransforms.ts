@@ -103,11 +103,12 @@ export async function getAllExamples(
         clientClassName: clientName,
         clientPackageName: packageDetails.name,
         samples: [],
-        importedTypes: []
+        importedTypes: [],
       };
       try {
         for (const example of exampleGroup.examples) {
           const sample: SampleDetails = {
+            sampleDetailFileName: `${exampleGroup.operationId}$$${getExampleFilenameWithoutExtension(example.originalFile)}`,
             sampleFunctionName: camelCase(
               _transformSpecialLetterToSpace(example?.name)
             ),
@@ -244,15 +245,25 @@ export async function getAllExamples(
         // enrich the importedTypes after all examples resolved
         sampleGroup.importedTypes = Array.from(importedTypeSet);
         if (generateSampleForAPIExplorer && sampleGroup.samples.length > 1) {
-          flatt
+          sampleGroup.samples.forEach(sampleUnit => {
+            const newSampleGroup: SampleGroup = { ...sampleGroup };
+            newSampleGroup.samples = [sampleUnit];
+            examplesModels.push(newSampleGroup)
+          });
         } else {
           examplesModels.push(sampleGroup);
         }
-
       }
     }
   }
   return examplesModels;
+}
+
+function getExampleFilenameWithoutExtension(originalFileName: string) {
+  // /@microsoft.azure/autorest.testserver/swagger/examples/enum_getNotExpandable.json
+  const slots = originalFileName.split("/");
+  const last = (slots.length > 0) ? slots[slots.length - 1] : "";
+  return last?.split(".")[0];
 }
 
 function _transformSpecialLetterToSpace(str: string) {

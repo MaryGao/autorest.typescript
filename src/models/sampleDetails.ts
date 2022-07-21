@@ -7,6 +7,7 @@ export interface SampleGroup {
 }
 
 export interface SampleDetails {
+    sampleDetailFileName: string,
     sampleFunctionName: string,
     clientParameterNames: string,
     methodParameterNames: string,
