@@ -56,8 +56,8 @@
       "type": "node",
       "request": "launch",
       "name": "IntegrationTests - Current File",
-      "cwd": "${workspaceFolder}/packages/autorest",
-      "program": "${workspaceFolder}/packages/autorest/node_modules/mocha/bin/_mocha",
+      "cwd": "${workspaceFolder}/packages/autorest.typescript",
+      "program": "${workspaceFolder}/packages/autorest.typescript/node_modules/mocha/bin/_mocha",
       "args": [
         "-r",
         "ts-node/register",
