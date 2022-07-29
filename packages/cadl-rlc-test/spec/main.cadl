@@ -19,6 +19,6 @@ model Error {
 interface WidgetService {
   @get list(): Widget[] | Error;
   @route("widgets/{id}") @get read(@path id: string): Widget | Error;
-  @post create(@body body: Widget): Widget | Error;
+  @post create(@body body: Widget,@header contentType: "application/octet-stream"): Widget | Error;
   @route("customGet") @get customGet(): Widget | Error;
 }

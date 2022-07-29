@@ -19,6 +19,23 @@
       "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     },
     {
+      "name": "Run Debug Smoke Test",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/packages/autorest.typescript",
+      "runtimeArgs": [
+        "ts-node",
+        "./test/commands/smoke-test.ts",
+        "--tag=debug"
+      ],
+      "runtimeExecutable": "npx",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "pwa-node",
+      "outFiles": [
+        "${workspaceFolder}/packages/*/dist/**/*.js",
+        "${workspaceFolder}/packages/*/dist-dev/**/*.js"
+      ]
+    },
+    {
       "type": "node",
       "request": "launch",
       "name": "UnitTests",

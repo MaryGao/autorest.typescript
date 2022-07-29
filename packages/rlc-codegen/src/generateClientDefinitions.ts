@@ -12,11 +12,13 @@ import {
   getPathParamDefinitions
 } from "./helpers/operationHelpers.js";
 import { Methods, Paths } from "./interfaces.js";
+import { PathParameterStructure } from "./parameterInterfaces.js";
 
 export interface RLCModel {
   libraryName: string;
   srcPath: string;
   paths: Paths;
+  params: PathParameterStructure[];
 }
 
 export function buildClientDefinitions(
@@ -111,8 +113,8 @@ function getPathFirstRoutesInterfaceDefinition(
             /{/g,
             "\\{"
           )}' has methods for the following verbs: ${Object.keys(
-          paths[key].methods
-        ).join(", ")}`
+            paths[key].methods
+          ).join(", ")}`
       ],
       parameters: [
         { name: "path", type: `"${key}"` },

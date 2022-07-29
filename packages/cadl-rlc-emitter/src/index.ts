@@ -2,6 +2,7 @@ import { CompilerHost, Program } from '@cadl-lang/compiler';
 import { buildClientDefinitions, Paths } from '@azure-tools/rlc-codegen';
 import { getAllRoutes } from '@cadl-lang/rest/http';
 import { dirname, join } from 'path';
+import { transformToParameterTypes } from './transform/transformParameterTypes';
 
 export async function $onEmit(program: Program) {
     const [routes, _diagnostics] = getAllRoutes(program);
@@ -34,8 +35,10 @@ export async function $onEmit(program: Program) {
             }
         };
     }
+    const res = transformToParameterTypes(routes);
+    console.log(res);
     const clientDefinitionsFile = buildClientDefinitions(
-        { paths, libraryName: 'Foo', srcPath: 'src' },
+        { paths, libraryName: 'Foo', srcPath: 'src', params: res },
         {
             clientImports: new Set(),
             importedParameters: new Set(),
