@@ -1,10 +1,15 @@
 import { ParameterPropertyStructure, ParameterTypeStructure, PathParameterStructure } from "@azure-tools/rlc-codegen/types/parameterInterfaces";
 import { OperationDetails, HttpOperationParameters, HttpOperationParameter } from "@cadl-lang/rest/http";
+import { NameType, normalizeName } from "../util/nameUtils.js";
 
 export function transformToParameterTypes(routes: OperationDetails[]) {
     const parameters: PathParameterStructure[] = [];
     for (const route of routes) {
-        const operationName = `${route.groupName}${route.operation.name}`;
+        const operationName = normalizeName(
+            `${route.groupName}_${route.operation.name}`,
+            NameType.Interface
+        );
+        ;
         const paramName = `${operationName}Parameters`;
         const rawParameters = route.parameters;
         const internReferences: ParameterTypeStructure[] = [];
@@ -13,12 +18,10 @@ export function transformToParameterTypes(routes: OperationDetails[]) {
         buildHeaderParameterStructure(internReferences, rawParameters, operationName);
         buildBodyParameterStructure(internReferences, rawParameters, operationName);
         buildContentTypeParameterStructure(internReferences, rawParameters, operationName);
-        const compositions: Record<string, ParameterTypeStructure | string> = {};
-        internReferences.forEach(r => compositions[r.name] = r);
-        compositions["RequestParameters"] = "RequestParameters";
         parameters.push({
             name: paramName,
-            compositions
+            baseType: "RequestParameters",
+            compositions: internReferences
         });
     }
 
@@ -47,7 +50,7 @@ function buildQueryParameterStructure(
             name: "queryParameters",
             type: queryParameterPropertiesName,
             // Mark as optional if there are no required parameters
-            isOptional: hasRequiredParameters,
+            isOptional: !hasRequiredParameters,
             // Need to construct the relevant property type
             buildType: true,
             buildStructure: {
@@ -93,7 +96,7 @@ function buildHeaderParameterStructure(
             name: "headers",
             type: `RawHttpHeadersInput & ${headerParameterPropertiesName}`,
             // Mark as optional if there are no required parameters
-            isOptional: hasRequiredParameters,
+            isOptional: !hasRequiredParameters,
             // Need to construct the relevant property type
             buildType: true,
             buildStructure: {
@@ -149,7 +152,7 @@ function buildContentTypeParameterStructure(
         properties: [{
             name: "contentType",
             description: "Request content type",
-            type: `Test`, // TODO
+            type: `"text/plain"`, // TODO
             // Mark as optional if there are no required parameters
             isOptional: Boolean(mediaTypes[0]?.param.optional),
             buildType: false
@@ -161,10 +164,10 @@ function buildContentTypeParameterStructure(
 
 function getParameterPropertyStructure(parameter: HttpOperationParameter) {
     const to: ParameterPropertyStructure = {
-        name: parameter.name,
-        description: "", // TODO
-        type: "",// TODO
-        isOptional: parameter.param.optional, // TODO
+        name: `"${parameter.name}"`, // TODO
+        description: "Remember to update description from doc", // TODO
+        type: "any",// TODO
+        isOptional: parameter.param.optional,
         buildType: false,
     };
     return to;

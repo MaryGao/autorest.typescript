@@ -1,19 +1,20 @@
 export interface PathParameterStructure {
     name: string;
-    compositions: Record<string, ParameterTypeStructure | string>;
+    baseType: string;
+    compositions: ParameterTypeStructure[];
 }
 
 export interface ParameterTypeStructure {
     name: string;
     description?: string;
-    properties?: ParameterPropertyStructure[];
+    properties: ParameterPropertyStructure[];
 }
 
 export interface ParameterPropertyStructure {
     name: string;
     description?: string;
     type: string;
-    isRequired?: boolean;
+    isOptional?: boolean;
     buildType: boolean;
     buildStructure?: ParameterTypeStructure;
 }

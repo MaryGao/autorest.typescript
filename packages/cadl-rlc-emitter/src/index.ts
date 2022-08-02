@@ -1,9 +1,8 @@
 import { CompilerHost, Program } from '@cadl-lang/compiler';
-import { buildClientDefinitions, Paths } from '@azure-tools/rlc-codegen';
+import { buildClientDefinitions, buildParameterTypes, Paths } from '@azure-tools/rlc-codegen';
 import { getAllRoutes } from '@cadl-lang/rest/http';
 import { dirname, join } from 'path';
-import { transformToParameterTypes } from './transform/transformParameterTypes';
-
+import { transformToParameterTypes } from './transform/transformParameterTypes.js';
 export async function $onEmit(program: Program) {
     const [routes, _diagnostics] = getAllRoutes(program);
     const paths: Paths = {};
@@ -36,9 +35,9 @@ export async function $onEmit(program: Program) {
         };
     }
     const res = transformToParameterTypes(routes);
-    console.log(res);
+    const rlcModel = { paths, libraryName: 'Foo', srcPath: 'src', params: res };
     const clientDefinitionsFile = buildClientDefinitions(
-        { paths, libraryName: 'Foo', srcPath: 'src', params: res },
+        rlcModel,
         {
             clientImports: new Set(),
             importedParameters: new Set(),
@@ -50,6 +49,17 @@ export async function $onEmit(program: Program) {
         ? join(program.compilerOptions.outputPath, clientDefinitionsFile.path)
         : clientDefinitionsFile.path;
     await emitFile(filePath, clientDefinitionsFile.content, program.host);
+
+    const parameterType = buildParameterTypes(rlcModel,
+        {
+            clientImports: new Set(),
+            importedParameters: new Set(),
+            importedResponses: new Set()
+        });
+    const parameterPath = program.compilerOptions.outputPath
+        ? join(program.compilerOptions.outputPath, parameterType.path)
+        : parameterType.path;
+    await emitFile(parameterPath, parameterType.content, program.host);
 }
 
 async function emitFile(path: string, content: string, host: CompilerHost) {
