@@ -12,7 +12,7 @@ export function transformToParameterTypes(routes: OperationDetails[]) {
         buildPathParameterStructure();
         buildHeaderParameterStructure(internReferences, rawParameters, operationName);
         buildBodyParameterStructure(internReferences, rawParameters, operationName);
-        buildContentTypeParameterStructure();
+        buildContentTypeParameterStructure(internReferences, rawParameters, operationName);
         const compositions: Record<string, ParameterTypeStructure | string> = {};
         internReferences.forEach(r => compositions[r.name] = r);
         compositions["RequestParameters"] = "RequestParameters";
@@ -39,7 +39,7 @@ function buildQueryParameterStructure(
     // Get the property detail for each query parameter
     const propertiesDetails = queryParameters.map(qp => getParameterPropertyStructure(qp));
     const hasRequiredParameters = propertiesDetails.some(
-        p => !p.isRequired
+        p => !p.isOptional
     );
     const queryParameter: ParameterTypeStructure = {
         name: queryParameterTypeName,
@@ -47,7 +47,7 @@ function buildQueryParameterStructure(
             name: "queryParameters",
             type: queryParameterPropertiesName,
             // Mark as optional if there are no required parameters
-            isRequired: hasRequiredParameters,
+            isOptional: hasRequiredParameters,
             // Need to construct the relevant property type
             buildType: true,
             buildStructure: {
@@ -85,7 +85,7 @@ function buildHeaderParameterStructure(
     // Get the property detail for each header parameter
     const propertiesDetails = headerParameters.map(hp => getParameterPropertyStructure(hp));
     const hasRequiredParameters = propertiesDetails.some(
-        p => !p.isRequired
+        p => !p.isOptional
     );
     const headerParameter: ParameterTypeStructure = {
         name: headerParameterTypeName,
@@ -93,7 +93,7 @@ function buildHeaderParameterStructure(
             name: "headers",
             type: `RawHttpHeadersInput & ${headerParameterPropertiesName}`,
             // Mark as optional if there are no required parameters
-            isRequired: hasRequiredParameters,
+            isOptional: hasRequiredParameters,
             // Need to construct the relevant property type
             buildType: true,
             buildStructure: {
@@ -124,7 +124,7 @@ function buildBodyParameterStructure(
             name: "body",
             type: bodyType,
             // Mark as optional if there are no required parameters
-            isRequired: bodyParameters.optional,
+            isOptional: bodyParameters.optional,
             // No need to construct the relevant property type
             buildType: false
         }]
@@ -143,6 +143,20 @@ function buildContentTypeParameterStructure(
     if (!mediaTypes.length) {
         return undefined;
     }
+    const mediaTypeParameterTypeName = `${operationName}MediaTypesParam`;
+    const mediaTypeParameter: ParameterTypeStructure = {
+        name: mediaTypeParameterTypeName,
+        properties: [{
+            name: "contentType",
+            description: "Request content type",
+            type: `Test`, // TODO
+            // Mark as optional if there are no required parameters
+            isOptional: Boolean(mediaTypes[0]?.param.optional),
+            buildType: false
+        }]
+    };
+    internReferences.push(mediaTypeParameter);
+    return mediaTypeParameter;
 }
 
 function getParameterPropertyStructure(parameter: HttpOperationParameter) {
@@ -150,7 +164,7 @@ function getParameterPropertyStructure(parameter: HttpOperationParameter) {
         name: parameter.name,
         description: "", // TODO
         type: "",// TODO
-        isRequired: false, // TODO
+        isOptional: parameter.param.optional, // TODO
         buildType: false,
     };
     return to;
