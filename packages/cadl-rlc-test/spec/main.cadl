@@ -16,38 +16,9 @@ model Error {
   message: string;
 }
 
-enum Versions {
-  v1,
-  v2,
-}
-
 interface WidgetService {
-  @get list(
-  @query
-  @minLength(1)
-  @doc("The API version to use for this operation.")
-  "api-version": string,
-  @doc("""
-Requested page size. Server may return fewer shelves than requested.
-If unspecified, server will pick an appropriate default.
-""")
-  @query
-  nextLink?: int32,
-  @query top?: int32,
-   @query skip?: int32,
-   @query maxpagesize?: int32
-  ): Widget[] | Error;
-  @route("widgets/{id}") @get read(@path id: string): Widget | Error;
-  @post create(
-    @body properties: Widget,
-    @header contentType: "application/octet-stream",
-    @header apiVersion: Versions,
-    @doc("The operation location header")
-    @header("Operation-Location")
-    operationLocation: string,
-    @doc("The Retry-After header can indicate how long the client should wait before polling the operation status.")
-    @header("Retry-After")
-    retryAfter?: int32
-    ): Widget | Error;
-  @route("customGet") @get customGet(): Widget | Error;
+  @get list(): Widget[];
+  @route("widgets/{id}") @get read(@path id: string): Widget;
+  @post create(@body body: Widget): Widget;
+  @route("customGet") @get customGet(): Widget;
 }

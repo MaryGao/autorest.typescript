@@ -1,6 +1,7 @@
 {
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "cadl.cadl-server.path": "${workspaceRoot}/common/temp/node_modules/@rush-temp/cadl-rest-test/node_modules/@cadl-lang/compiler",
   "cSpell.words": ["Autorest", "SDKs"],
   "markdownlint.config": {
     "MD028": false,
