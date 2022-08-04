@@ -1,3 +1,12 @@
+export interface RLCModel {
+  libraryName: string;
+  srcPath: string;
+  paths: Paths;
+  schemas?: Schema[];
+  params?: PathParameterDefinition[];
+  responses?: ResponseSchema[];
+}
+
 export type Methods = {
   [key: string]: [OperationMethod];
 };
@@ -44,10 +53,6 @@ export interface PathParameterDefinition {
 
 export type PathParameterPart = PathInterfaceBase;
 
-export interface PathResponseDefinition extends PathInterfaceBase {
-  extendFrom?: string;
-}
-
 export interface PathInterfaceBase {
   name: string;
   description?: string;
@@ -62,3 +67,50 @@ export interface PropertyDefinition {
   buildType: boolean;
   buildStructure?: PathInterfaceBase;
 }
+export interface File {
+  path: string,
+  content: string
+}
+
+export enum SchemaContext {
+  /** Schema is used as an input to an operation. */
+  Input = "input",
+  /** Schema is used as an output from an operation. */
+  Output = "output",
+  /** Schema is used as an exception from an operation. */
+  Exception = "exception"
+}
+
+export interface Schema {
+  name: string;
+  type: string;
+  description?: string;
+  required?: boolean;
+  default?: any;
+  readOnly?: boolean;
+  usage?: SchemaContext[];
+}
+
+export interface ObjectSchema extends Schema {
+  properties?: Record<string, Schema>;
+  discriminatorValue?: string;
+  discriminator?: Schema;
+  children?: {
+    all?: ObjectSchema[];
+    immediate?: ObjectSchema[];
+  };
+  parents?: { 
+    all?: ObjectSchema[]
+    immediate?: ObjectSchema[];
+  }
+}
+
+export interface Property extends Schema {
+
+}
+
+export interface Parameter extends Schema {
+
+}
+
+export type ResponseSchema = ObjectSchema;

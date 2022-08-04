@@ -3,6 +3,7 @@ import { buildClientDefinitions, buildParameterTypes, Paths } from '@azure-tools
 import { getAllRoutes } from '@cadl-lang/rest/http';
 import { dirname, join } from 'path';
 import { transformToParameterTypes } from './transform/transformParameterTypes.js';
+import { transformToResponseTypes } from './transform/transformResponseTypes.js';
 export async function $onEmit(program: Program) {
     const [routes, _diagnostics] = getAllRoutes(program);
     const paths: Paths = {};
@@ -35,6 +36,7 @@ export async function $onEmit(program: Program) {
         };
     }
     const res = transformToParameterTypes(routes);
+    transformToResponseTypes(program);
     const rlcModel = { paths, libraryName: 'Foo', srcPath: 'src', params: res };
     const clientDefinitionsFile = buildClientDefinitions(
         rlcModel,

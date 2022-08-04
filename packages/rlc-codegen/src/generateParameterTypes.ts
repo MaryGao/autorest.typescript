@@ -1,7 +1,6 @@
 import { InterfaceDeclarationStructure, Project, PropertySignatureStructure, StructureKind } from "ts-morph";
-import { RLCModel } from "./generateClientDefinitions.js";
 import * as path from "path";
-import { ParameterPropertyStructure, ParameterTypeStructure } from "./parameterInterfaces.js";
+import { PathParameterPart, PropertyDefinition, RLCModel } from "./interfaces";
 
 export function buildParameterTypes(
     model: RLCModel,
@@ -17,7 +16,7 @@ export function buildParameterTypes(
     const parametersFile = project.createSourceFile(filePath, undefined, {
         overwrite: true
     });
-    for (const param of model.params) {
+    for (const param of (model?.params || [])) {
         for (const part of param.compositions) {
             parametersFile.addInterfaces(buildParameterInterface(part));
         }
@@ -42,9 +41,9 @@ export function buildParameterTypes(
 
 }
 
-function buildParameterInterface(param: ParameterTypeStructure) {
+function buildParameterInterface(param: PathParameterPart) {
     let constructInterfaces: InterfaceDeclarationStructure[] = [];
-    const propertiesToBuild: ParameterTypeStructure[] = param.properties.filter(p => p.buildType && (p.buildStructure != undefined)).map(p => p!.buildStructure!);
+    const propertiesToBuild: PathParameterPart[] = param.properties.filter(p => p.buildType && (p.buildStructure != undefined)).map(p => p!.buildStructure!);
     const paramInterface: InterfaceDeclarationStructure = {
         isExported: true,
         kind: StructureKind.Interface,
@@ -58,7 +57,7 @@ function buildParameterInterface(param: ParameterTypeStructure) {
     return constructInterfaces;
 }
 
-function buildParameterProperty(prop: ParameterPropertyStructure): PropertySignatureStructure {
+function buildParameterProperty(prop: PropertyDefinition): PropertySignatureStructure {
     const description = prop.description;
     return {
         name: prop.name,

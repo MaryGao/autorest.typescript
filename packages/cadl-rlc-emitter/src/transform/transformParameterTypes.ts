@@ -1,18 +1,17 @@
-import { ParameterPropertyStructure, ParameterTypeStructure, PathParameterStructure } from "@azure-tools/rlc-codegen/types/parameterInterfaces";
+import { PathParameterDefinition, PathParameterPart, PropertyDefinition } from "@azure-tools/rlc-codegen";
 import { OperationDetails, HttpOperationParameters, HttpOperationParameter } from "@cadl-lang/rest/http";
 import { NameType, normalizeName } from "../util/nameUtils.js";
 
 export function transformToParameterTypes(routes: OperationDetails[]) {
-    const parameters: PathParameterStructure[] = [];
+    const parameters: PathParameterDefinition[] = [];
     for (const route of routes) {
         const operationName = normalizeName(
             `${route.groupName}_${route.operation.name}`,
             NameType.Interface
         );
-        ;
         const paramName = `${operationName}Parameters`;
         const rawParameters = route.parameters;
-        const internReferences: ParameterTypeStructure[] = [];
+        const internReferences: PathParameterPart[] = [];
         buildQueryParameterStructure(internReferences, rawParameters, operationName);
         buildPathParameterStructure();
         buildHeaderParameterStructure(internReferences, rawParameters, operationName);
@@ -29,7 +28,7 @@ export function transformToParameterTypes(routes: OperationDetails[]) {
 }
 
 function buildQueryParameterStructure(
-    internReferences: ParameterTypeStructure[],
+    internReferences: PathParameterPart[],
     rawParameters: HttpOperationParameters,
     operationName: string) {
     const queryParameters = rawParameters.parameters.filter(p => p.type === "query");
@@ -44,7 +43,7 @@ function buildQueryParameterStructure(
     const hasRequiredParameters = propertiesDetails.some(
         p => !p.isOptional
     );
-    const queryParameter: ParameterTypeStructure = {
+    const queryParameter: PathParameterPart = {
         name: queryParameterTypeName,
         properties: [{
             name: "queryParameters",
@@ -73,7 +72,7 @@ function buildPathParameterStructure() {
 }
 
 function buildHeaderParameterStructure(
-    internReferences: ParameterTypeStructure[],
+    internReferences: PathParameterPart[],
     rawParameters: HttpOperationParameters,
     operationName: string) {
     const headerParameters = rawParameters.parameters.filter(
@@ -90,7 +89,7 @@ function buildHeaderParameterStructure(
     const hasRequiredParameters = propertiesDetails.some(
         p => !p.isOptional
     );
-    const headerParameter: ParameterTypeStructure = {
+    const headerParameter: PathParameterPart = {
         name: headerParameterTypeName,
         properties: [{
             name: "headers",
@@ -110,7 +109,7 @@ function buildHeaderParameterStructure(
 }
 
 function buildBodyParameterStructure(
-    internReferences: ParameterTypeStructure[],
+    internReferences: PathParameterPart[],
     rawParameters: HttpOperationParameters,
     operationName: string) {
     const bodyParameters = rawParameters.body;
@@ -121,7 +120,7 @@ function buildBodyParameterStructure(
     // TODO: handle more body types 
     const bodyType = (bodyParameters.type.kind === "Model") ? bodyParameters.type.name : "";
     // In case of formData we'd get multiple properties in body marked as partialBody
-    const headerParameter: ParameterTypeStructure = {
+    const headerParameter: PathParameterPart = {
         name: bodyParameterTypeName,
         properties: [{
             name: "body",
@@ -137,7 +136,7 @@ function buildBodyParameterStructure(
 }
 
 function buildContentTypeParameterStructure(
-    internReferences: ParameterTypeStructure[],
+    internReferences: PathParameterPart[],
     rawParameters: HttpOperationParameters,
     operationName: string) {
     const mediaTypes = rawParameters.parameters.filter(
@@ -147,7 +146,7 @@ function buildContentTypeParameterStructure(
         return undefined;
     }
     const mediaTypeParameterTypeName = `${operationName}MediaTypesParam`;
-    const mediaTypeParameter: ParameterTypeStructure = {
+    const mediaTypeParameter: PathParameterPart = {
         name: mediaTypeParameterTypeName,
         properties: [{
             name: "contentType",
@@ -163,7 +162,7 @@ function buildContentTypeParameterStructure(
 }
 
 function getParameterPropertyStructure(parameter: HttpOperationParameter) {
-    const to: ParameterPropertyStructure = {
+    const to: PropertyDefinition = {
         name: `"${parameter.name}"`, // TODO
         description: "Remember to update description from doc", // TODO
         type: "any",// TODO

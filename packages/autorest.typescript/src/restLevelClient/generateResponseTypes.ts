@@ -67,9 +67,9 @@ export function generateResponseInterfaces(model: CodeModel, project: Project) {
       const headersInterface:
         | InterfaceDeclarationStructure
         | undefined = getResponseHeaderInterfaceDefinition(
-        schemaResponse,
-        baseResponseName
-      );
+          schemaResponse,
+          baseResponseName
+        );
 
       if (headersInterface) {
         hasHeaders = true;
