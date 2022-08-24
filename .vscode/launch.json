@@ -39,14 +39,15 @@
       "type": "node",
       "request": "launch",
       "name": "IntegrationTests",
-      "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",
+      "cwd": "${workspaceFolder}/packages/autorest.typescript",
+      "program": "${workspaceFolder}/packages/autorest.typescript/node_modules/mocha/bin/_mocha",
       "args": [
         "-r",
         "ts-node/register",
         "--timeout",
         "999999",
         "--colors",
-        "${workspaceFolder}/test/integration/**/*.spec.ts"
+        "${workspaceFolder}/packages/autorest.typescript/test/integration/lro.spec.ts"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
