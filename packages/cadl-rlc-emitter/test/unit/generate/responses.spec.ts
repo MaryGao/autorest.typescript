@@ -3,8 +3,9 @@ import { emitResponsesFromCadl } from "../emitUtil.js";
 import { assertEqualContent } from "../testUtil.js";
 
 describe("Responses.ts", () => {
-  it("should generate property name with custome name", async () => {
-    const responses = await emitResponsesFromCadl(`
+  describe("property name", () => {
+    it("should generate property name with custome name", async () => {
+      const responses = await emitResponsesFromCadl(`
         @doc("Metadata for long running operation status monitor locations")
         model LongRunningStatusLocation {
             @doc("The location for monitoring the operation state.")
@@ -13,10 +14,10 @@ describe("Responses.ts", () => {
         }
         op read(): LongRunningStatusLocation;
     `);
-    assert.ok(responses);
-    assertEqualContent(
-      responses!.content,
-      `
+      assert.ok(responses);
+      assertEqualContent(
+        responses!.content,
+        `
     import { RawHttpHeaders } from "@azure/core-rest-pipeline";
     import { HttpResponse } from "@azure-rest/core-client";
     
@@ -30,11 +31,11 @@ describe("Responses.ts", () => {
       status: "204";
       headers: RawHttpHeaders & Read204Headers;
     }`
-    );
-  });
+      );
+    });
 
-  it("should generate property name without custome name", async () => {
-    const responses = await emitResponsesFromCadl(`
+    it("should generate property name without custome name", async () => {
+      const responses = await emitResponsesFromCadl(`
         @doc("Metadata for long running operation status monitor locations")
         model LongRunningStatusLocation {
             @doc("The location for monitoring the operation state.")
@@ -43,10 +44,10 @@ describe("Responses.ts", () => {
         }
         op read(): LongRunningStatusLocation;
     `);
-    assert.ok(responses);
-    assertEqualContent(
-      responses!.content,
-      `
+      assert.ok(responses);
+      assertEqualContent(
+        responses!.content,
+        `
     import { RawHttpHeaders } from "@azure/core-rest-pipeline";
     import { HttpResponse } from "@azure-rest/core-client";
     
@@ -60,6 +61,11 @@ describe("Responses.ts", () => {
       status: "204";
       headers: RawHttpHeaders & Read204Headers;
     }`
-    );
+      );
+    });
+  });
+
+  describe("body type", () => {
+    it("should handle binary resonspe body", async () => {});
   });
 });
