@@ -144,4 +144,65 @@ describe("Parameters.ts", () => {
       );
     });
   });
+
+  describe.only("path parameter at method level", () => {
+    it("should not generate method-level path param", async () => {
+      const parameters = await emitParameterFromCadl(
+        `
+        @server(
+          "{Endpoint}/language",
+          "Language Service",
+          {
+            Endpoint: Endpoint,
+          }
+        )
+        @serviceTitle("PetStoreClient")
+        namespace PetStore;
+        @doc("The endpoint to use.")
+        model Endpoint is string;
+
+        op test(): string;
+        `
+      );
+      assert.ok(parameters);
+      assertEqualContent(
+        parameters?.content!,
+        `
+        import { RequestParameters } from "@azure-rest/core-client";
+        
+        export type PetStoreTestParameters = RequestParameters;
+        `
+      );
+    });
+
+    it("should generate method-level path param if existing", async () => {
+      const parameters = await emitParameterFromCadl(
+        `
+        @server(
+          "{Endpoint}/language",
+          "Language Service",
+          {
+            Endpoint: Endpoint,
+          }
+        )
+        @serviceTitle("PetStoreClient")
+        namespace PetStore;
+        @doc("The endpoint to use.")
+        @extension("x-ms-parameter-location", "method")
+        model Endpoint is string;
+
+        op test(): string;
+        `
+      );
+      assert.ok(parameters);
+      assertEqualContent(
+        parameters?.content!,
+        `
+        import { RequestParameters } from "@azure-rest/core-client";
+        
+        export type PetStoreTestParameters = RequestParameters;
+        `
+      );
+    });
+  });
 });
