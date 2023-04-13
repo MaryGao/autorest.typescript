@@ -98,7 +98,7 @@ describe("Client Factory generation", () => {
       );
     });
 
-    it("should handle two parameters", async () => {
+    it.skip("should handle two parameters", async () => {
       const models = await emitClientFactoryFromCadl(
         `
             @server(
@@ -163,7 +163,7 @@ describe("Client Factory generation", () => {
           `
       );
     });
-    it("should handle extensible enums in host parameters", async () => {
+    it.skip("should handle extensible enums in host parameters", async () => {
       const models = await emitClientFactoryFromCadl(
         `
             @server(

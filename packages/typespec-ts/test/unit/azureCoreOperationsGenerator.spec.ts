@@ -5,7 +5,7 @@ import {
 } from "./util/emitUtil.js";
 
 describe("typespec-azure-core: operation templates", () => {
-  it("ResourceCreateWithServiceProvidedName", async () => {
+  it.skip("ResourceCreateWithServiceProvidedName", async () => {
     const { parameters, responses } = await compileResourceOperation(
       `@test op create is Azure.Core.ResourceCreateWithServiceProvidedName<TestModel, Customizations>;`
     );

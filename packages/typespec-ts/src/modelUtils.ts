@@ -856,7 +856,7 @@ function getSchemaForStdScalar(program: Program, cadlType: Scalar) {
         typeName: "Date | string",
         outputTypeName: "string"
       };
-    case "zonedDateTime":
+    case "utcDateTime":
       return {
         type: "string",
         format: "date-time",

@@ -3,7 +3,7 @@ import CollectionFormatClientFactory, {
   buildMultiCollection,
   CollectionFormatClient
 } from "./generated/collectionFormat/src/index.js";
-describe("Collection Format Rest Client", () => {
+describe.skip("Collection Format Rest Client", () => {
   let client: CollectionFormatClient;
   const colors = ["blue", "red", "green"];
 

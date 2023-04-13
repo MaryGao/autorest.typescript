@@ -951,7 +951,7 @@ function emitStdScalar(
       return { type: "boolean" };
     case "plainDate":
       return { type: "date" };
-    case "zonedDateTime":
+    case "utcDateTime":
       return { type: "datetime", format: "date-time" };
     case "plainTime":
       return { type: "time" };
