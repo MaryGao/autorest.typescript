@@ -187,19 +187,19 @@ describe("Shared route support", () => {
             id: string;
         }
 
-        model SimpleHtmlResponse {
-            @header "content-Type": "text/html";
-            @body body: Resource
-        }
-
-        model SimplePlainResponse {
-            @header "content-Type": "text/plain";
-            @body body: Resource
+        model Text  {
+            @header("content-type") contentType: "text/plain";
+            @body body: string;
+            
+        };
+        model Text {
+            @header("content-type") contentType: "application/octet-stream";
+            @body body: bytes;
         }
         @route("/sharedroutes/resources", { shared: true })
-        op listByResourceGroup(...Resource): SimpleHtmlResponse;
+        op uploadText(...Text): SimpleHtmlResponse;
         @route("/sharedroutes/resources", { shared: true })
-        op listBySubscription(...Resource): SimplePlainResponse;
+        op uploadImage(...Text): SimplePlainResponse;
         `;
       const clientDef = await emitClientDefinitionFromCadl(tspDef);
       const responseDef = await emitResponsesFromCadl(tspDef);
