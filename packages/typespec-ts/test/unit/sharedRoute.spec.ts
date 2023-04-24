@@ -154,7 +154,7 @@ describe("Shared route support", () => {
   });
 
   describe("@header(content-type) responses differs", () => {
-    it("model shared routes that differ by variable query parameters", async () => {
+    it.only("model shared routes that differ by variable query parameters", async () => {
       const tspDef = `
         model Resource {
             id: string;
@@ -177,6 +177,24 @@ describe("Shared route support", () => {
       const clientDef = await emitClientDefinitionFromCadl(tspDef);
       const responseDef = await emitResponsesFromCadl(tspDef);
       console.log(clientDef, responseDef);
+      assertEqualContent(
+        clientDef?.content!,
+        `
+      import { HttpResponse } from "@azure-rest/core-client";
+      import { ResourceOutput } from "./outputModels";
+      /** The request has succeeded. */
+      export interface ListByResourceGroup200Response extends HttpResponse {
+        status: "200";
+        body: ResourceOutput;
+      }
+    
+      /** The request has succeeded. */
+      export interface ListBySubscription200Response extends HttpResponse {
+        status: "200";
+        body: ResourceOutput;
+      }
+      `
+      );
     });
   });
 
