@@ -52,7 +52,11 @@ export function getOperationStatuscode(
 
 // FIXME: this is the placeholder function to extract the operationGroupName
 export function getOperationGroupName(operationGroup?: SdkOperationGroup) {
-  return operationGroup?.type.name ?? "";
+  return normalizeName(
+    operationGroup?.type.name ?? "",
+    NameType.Interface,
+    true
+  );
 }
 
 export function isDefaultStatusCode(statusCode: StatusCode) {
@@ -187,7 +191,7 @@ export function extractPagedMetadataNested(
   if (paged) {
     return paged;
   }
-  const templateArguments = type.templateArguments;
+  const templateArguments = type.templateMapper?.args;
   if (templateArguments) {
     for (const argument of templateArguments) {
       const modelArgument = argument as Model;
