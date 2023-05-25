@@ -5,6 +5,7 @@ export interface CadlRanchConfig {
 }
 
 export const cadls: CadlRanchConfig[] = [
+  { outputPath: "models/empty", inputPath: "type/model/empty", debug: true },
   {
     outputPath: "encode",
     inputPath: "encode/duration"
