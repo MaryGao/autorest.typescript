@@ -3,6 +3,6 @@
   "useWorkspaces": true,
   "strictPeerDependencies": false,
   "globalOverrides": {
-    "@azure/core-rest-pipeline": "1.13.1-alpha.20240110.1"
+    "@azure/core-rest-pipeline": "D:/Js-sdk-sync/azure-sdk-for-js/sdk/core/core-rest-pipeline"
   }
 }
