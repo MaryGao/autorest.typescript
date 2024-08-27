@@ -8,7 +8,7 @@ options:
     isModularLibrary: true
     hierarchyClient: false
     generateSample: true
-    examples-directory: "../../../../../../temp/http/azure/example/basic/examples"
+    examples-directory: "{project-root}/../../../../../../temp/http/azure/example/basic/examples"
     "emitter-output-dir": "{project-root}"
     packageDetails:
       name: "@msinternal/example"
