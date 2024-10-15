@@ -23,14 +23,6 @@ describe.only("Client definition generation", () => {
       pathParameters: TemplatePathParameters;
     }
 
-    /** You can use the function buildAllowReservedValue to help prepare this parameter. */
-      export interface TemplateParamPathParam {
-        /** A sequence of textual characters. */
-        value: string;
-        /** Whether to allow reserved characters */
-        allowReserved: true;
-    }
-
     export type TemplateParameters = TemplatePathParam & RequestParameters;
       `
     );
