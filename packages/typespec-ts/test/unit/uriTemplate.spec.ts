@@ -2,7 +2,7 @@ import { assert } from "chai";
 import { emitParameterFromTypeSpec } from "../util/emitUtil.js";
 import { assertEqualContent } from "../util/testUtil.js";
 
-describe.only("Client definition generation", () => {
+describe("Client definition generation", () => {
   it("should generate method-level parameter", async () => {
     const clientDef = await emitParameterFromTypeSpec(
       `
