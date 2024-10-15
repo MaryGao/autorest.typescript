@@ -16,14 +16,16 @@ describe("Client definition generation", () => {
       clientDef?.content!,
       `
     import { RequestParameters } from "@azure-rest/core-client";
-    
-    export interface TemplatePathParameters {}
 
-    export interface TemplatePathParam {
-      pathParameters: TemplatePathParameters;
+    /** You can use the function buildAllowReservedValue to help prepare this parameter. */
+    export interface TemplateParamPathParam {
+      /** A sequence of textual characters. */
+      value: string;
+      /** Whether to allow reserved characters */
+      allowReserved: true;
     }
 
-    export type TemplateParameters = TemplatePathParam & RequestParameters;
+    export type TemplateParameters = RequestParameters;
       `
     );
   });
