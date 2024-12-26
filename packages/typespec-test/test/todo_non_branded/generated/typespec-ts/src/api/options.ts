@@ -4,11 +4,12 @@ import { TodoAttachment } from "../models/models.js";
 import { OperationOptions } from "@typespec/ts-http-runtime";
 
 /** Optional parameters. */
-export interface TodoItemsAttachmentsCreateAttachmentOptionalParams
-  extends OperationOptions {
-  /** Body parameter's content type. Known values are application/json */
-  contentType?: "application/json";
-}
+export interface TodoItemsAttachmentsCreateFileAttachmentOptionalParams
+  extends OperationOptions {}
+
+/** Optional parameters. */
+export interface TodoItemsAttachmentsCreateJsonAttachmentOptionalParams
+  extends OperationOptions {}
 
 /** Optional parameters. */
 export interface TodoItemsAttachmentsListOptionalParams
@@ -24,7 +25,10 @@ export interface TodoItemsUpdateOptionalParams extends OperationOptions {}
 export interface TodoItemsGetOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
-export interface TodoItemsCreateOptionalParams extends OperationOptions {
+export interface TodoItemsCreateFormOptionalParams extends OperationOptions {}
+
+/** Optional parameters. */
+export interface TodoItemsCreateJsonOptionalParams extends OperationOptions {
   attachments?: TodoAttachment[];
 }
 
