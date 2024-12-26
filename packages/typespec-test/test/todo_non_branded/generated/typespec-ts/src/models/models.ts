@@ -146,8 +146,8 @@ export function todoLabelRecordArrayDeserializer(
   });
 }
 
-/** model interface TodoFileAttachment */
-export interface TodoFileAttachment {
+/** model interface TodoAttachment */
+export interface TodoAttachment {
   /** The file name of the attachment */
   filename: string;
   /** The media type of the attachment */
@@ -156,7 +156,7 @@ export interface TodoFileAttachment {
   contents: Uint8Array;
 }
 
-export function todoFileAttachmentSerializer(item: TodoFileAttachment): any {
+export function todoAttachmentSerializer(item: TodoAttachment): any {
   return {
     filename: item["filename"],
     mediaType: item["mediaType"],
@@ -164,7 +164,7 @@ export function todoFileAttachmentSerializer(item: TodoFileAttachment): any {
   };
 }
 
-export function todoFileAttachmentDeserializer(item: any): TodoFileAttachment {
+export function todoAttachmentDeserializer(item: any): TodoAttachment {
   return {
     filename: item["filename"],
     mediaType: item["mediaType"],
@@ -172,25 +172,6 @@ export function todoFileAttachmentDeserializer(item: any): TodoFileAttachment {
       typeof item["contents"] === "string"
         ? stringToUint8Array(item["contents"], "base64")
         : item["contents"],
-  };
-}
-
-/** model interface TodoUrlAttachment */
-export interface TodoUrlAttachment {
-  /** A description of the URL */
-  description: string;
-  /** The url */
-  url: string;
-}
-
-export function todoUrlAttachmentSerializer(item: TodoUrlAttachment): any {
-  return { description: item["description"], url: item["url"] };
-}
-
-export function todoUrlAttachmentDeserializer(item: any): TodoUrlAttachment {
-  return {
-    description: item["description"],
-    url: item["url"],
   };
 }
 
@@ -210,19 +191,8 @@ export function todoAttachmentArrayDeserializer(
   });
 }
 
-/** Alias for TodoAttachment */
-export type TodoAttachment = TodoFileAttachment | TodoUrlAttachment;
-
-export function todoAttachmentSerializer(item: TodoAttachment): any {
-  return item;
-}
-
-export function todoAttachmentDeserializer(item: any): TodoAttachment {
-  return item;
-}
-
-/** model interface _CreateResponse */
-export interface _CreateResponse {
+/** model interface _CreateJsonResponse */
+export interface _CreateJsonResponse {
   /** The item's unique id */
   readonly id: number;
   /** The item's title */
@@ -244,7 +214,91 @@ export interface _CreateResponse {
   labels?: TodoLabels;
 }
 
-export function _createResponseDeserializer(item: any): _CreateResponse {
+export function _createJsonResponseDeserializer(
+  item: any,
+): _CreateJsonResponse {
+  return {
+    id: item["id"],
+    title: item["title"],
+    createdBy: item["createdBy"],
+    assignedTo: item["assignedTo"],
+    description: item["description"],
+    status: item["status"],
+    createdAt: new Date(item["createdAt"]),
+    updatedAt: new Date(item["updatedAt"]),
+    completedAt: !item["completedAt"]
+      ? item["completedAt"]
+      : new Date(item["completedAt"]),
+    labels: !item["labels"]
+      ? item["labels"]
+      : todoLabelsDeserializer(item["labels"]),
+  };
+}
+
+/** model interface ToDoItemMultipartRequest */
+export interface ToDoItemMultipartRequest {
+  item: TodoItem;
+  attachments?: File[];
+}
+
+export function toDoItemMultipartRequestSerializer(
+  item: ToDoItemMultipartRequest,
+): any {
+  return {
+    item: todoItemSerializer(item["item"]),
+    attachments: !item["attachments"]
+      ? item["attachments"]
+      : fileArraySerializer(item["attachments"]),
+  };
+}
+
+export function fileArraySerializer(result: Array<File>): any[] {
+  return result.map((item) => {
+    return fileSerializer(item);
+  });
+}
+
+/** model interface File */
+export interface File {
+  contentType?: string;
+  filename?: string;
+  contents: Uint8Array;
+}
+
+export function fileSerializer(item: File): any {
+  return {
+    contentType: item["contentType"],
+    filename: item["filename"],
+    contents: uint8ArrayToString(item["contents"], "base64"),
+  };
+}
+
+/** model interface _CreateFormResponse */
+export interface _CreateFormResponse {
+  /** The item's unique id */
+  readonly id: number;
+  /** The item's title */
+  title: string;
+  /** User that created the todo */
+  readonly createdBy: number;
+  /** User that the todo is assigned to */
+  assignedTo?: number;
+  /** A longer description of the todo item in markdown format */
+  description?: string;
+  /** The status of the todo item */
+  status: "NotStarted" | "InProgress" | "Completed";
+  /** When the todo item was created. */
+  readonly createdAt: Date;
+  /** When the todo item was last updated */
+  readonly updatedAt: Date;
+  /** When the todo item was makred as completed */
+  readonly completedAt?: Date;
+  labels?: TodoLabels;
+}
+
+export function _createFormResponseDeserializer(
+  item: any,
+): _CreateFormResponse {
   return {
     id: item["id"],
     title: item["title"],
@@ -379,6 +433,17 @@ export function pageTodoAttachmentDeserializer(item: any): PageTodoAttachment {
   };
 }
 
+/** model interface FileAttachmentMultipartRequest */
+export interface FileAttachmentMultipartRequest {
+  contents: File;
+}
+
+export function fileAttachmentMultipartRequestSerializer(
+  item: FileAttachmentMultipartRequest,
+): any {
+  return { contents: fileSerializer(item["contents"]) };
+}
+
 /** model interface User */
 export interface User {
   /** An autogenerated unique id for the user */
@@ -402,8 +467,8 @@ export function userSerializer(item: User): any {
   };
 }
 
-/** model interface _CreateResponse1 */
-export interface _CreateResponse1 {
+/** model interface _CreateResponse */
+export interface _CreateResponse {
   /** An autogenerated unique id for the user */
   readonly id: number;
   /** The user's username */
@@ -414,7 +479,7 @@ export interface _CreateResponse1 {
   token: string;
 }
 
-export function _createResponse1Deserializer(item: any): _CreateResponse1 {
+export function _createResponseDeserializer(item: any): _CreateResponse {
   return {
     id: item["id"],
     username: item["username"],
