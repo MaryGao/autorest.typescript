@@ -17,6 +17,18 @@ import {
   generateMethodCall,
   createSourceFile
 } from "./helpers/exampleValueHelpers.js";
+import { getDefaultService } from "../utils/modelUtils.js";
+import { getServers } from "@typespec/http";
+
+/**
+ * Check if service has @server decorator with template parameters
+ */
+function checkHasServerTemplateParams(dpgContext: SdkContext): boolean {
+  const program = dpgContext.program;
+  const serviceNs = getDefaultService(program)?.type;
+  const servers = serviceNs ? getServers(program, serviceNs) : undefined;
+  return !!(servers?.[0]?.url && servers[0].url.includes("{"));
+}
 
 /**
  * Helpers to emit samples
@@ -58,6 +70,16 @@ function emitMethodSamples(
     });
   }
 
+  // Check if we need dotenv import based on server template parameters
+  const hasServerTemplateParams = checkHasServerTemplateParams(dpgContext);
+  if (hasServerTemplateParams) {
+    sourceFile.addImportDeclaration({
+      moduleSpecifier: "dotenv",
+      namespaceImport: "dotenv"
+    });
+    sourceFile.addStatements("dotenv.config();");
+  }
+
   for (const example of examples) {
     const exampleFunctionBody: string[] = [];
     const exampleName = normalizeName(
@@ -71,7 +93,8 @@ function emitMethodSamples(
       method,
       parameterMap,
       options.client,
-      false // isForTest = false for samples
+      false, // isForTest = false for samples
+      hasServerTemplateParams // includeClientParams
     );
 
     const { methodCall, clientParams, clientParamDefs } = generateMethodCall(

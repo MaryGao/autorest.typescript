@@ -301,29 +301,114 @@ export function getDescriptiveName(
 /**
  * Common logic for preparing parameters for both samples and tests
  */
-export function prepareCommonParameters(
-  dpgContext: SdkContext,
-  method: ServiceOperation,
-  parameterMap: Record<string, SdkHttpParameterExampleValue>,
-  topLevelClient: SdkClientType<SdkServiceOperation>,
-  isForTest: boolean = false
-): CommonValue[] {
-  const envType = resolveReference(AzureTestDependencies.env);
-  const result: CommonValue[] = [];
+/**
+ * Convert parameter name to environment variable name format
+ */
+function getEnvVarName(paramName: string): string {
+  // Handle special cases first
+  const specialMappings: { [key: string]: string } = {
+    resourceGroupName: "RESOURCE_GROUP",
+    subscriptionId: "SUBSCRIPTION_ID",
+    workspaceName: "WORKSPACE_NAME",
+    endpoint: "ENDPOINT"
+  };
 
-  // Handle credentials
-  const credentialValue = isForTest
-    ? getCredentialTestValue(dpgContext, topLevelClient.clientInitialization)
-    : getCredentialSampleValue(dpgContext, topLevelClient.clientInitialization);
-  if (credentialValue) {
-    result.push(credentialValue);
+  if (specialMappings[paramName]) {
+    return specialMappings[paramName];
   }
 
+  return paramName
+    .replace(/([A-Z])/g, "_$1") // Insert underscore before uppercase letters
+    .toUpperCase() // Convert to uppercase
+    .replace(/^_/, ""); // Remove leading underscore if any
+}
+
+/**
+ * Add client-level parameters when includeClientParams is true
+ */
+function addClientLevelParameters(
+  dpgContext: SdkContext,
+  topLevelClient: SdkClientType<SdkServiceOperation>,
+  _parameterMap: Record<string, SdkHttpParameterExampleValue>,
+  result: CommonValue[],
+  isForTest: boolean,
+  envType: string
+): CommonValue | undefined {
+  let credentialValue: CommonValue | undefined;
+
+  for (const param of topLevelClient.clientInitialization.parameters) {
+    // Skip credentials - store for later
+    if (param.type.kind === "credential" || param.name === "credential") {
+      if (!credentialValue) {
+        credentialValue = isForTest
+          ? getCredentialTestValue(
+              dpgContext,
+              topLevelClient.clientInitialization
+            )
+          : getCredentialSampleValue(
+              dpgContext,
+              topLevelClient.clientInitialization
+            );
+      }
+      continue;
+    }
+
+    // Skip parameters with default values
+    if (param.optional || param.clientDefaultValue) {
+      continue;
+    }
+
+    // Handle endpoint template parameters
+    if (
+      param.type.kind === "union" &&
+      param.type.variantTypes[0]?.kind === "endpoint"
+    ) {
+      const templateArgs = param.type.variantTypes[0].templateArguments;
+      for (const templateParam of templateArgs) {
+        if (!templateParam.optional) {
+          const envVarName = getEnvVarName(templateParam.name);
+          const value = isForTest
+            ? `${envType}.${envVarName} || "<${envVarName}>"`
+            : `process.env.${envVarName} || ""`;
+          result.push(
+            prepareCommonValue(templateParam.name, value, false, true)
+          );
+        }
+      }
+    } else if (param.type.kind === "endpoint") {
+      const envVarName = getEnvVarName(param.name);
+      const value = isForTest
+        ? `${envType}.${envVarName} || "<${envVarName}>"`
+        : `process.env.${envVarName} || ""`;
+      result.push(prepareCommonValue(param.name, value, false, true));
+    } else {
+      // Handle other required client parameters
+      const envVarName = getEnvVarName(param.name);
+      const value = isForTest
+        ? `${envType}.${envVarName} || "<${envVarName}>"`
+        : `process.env.${envVarName} || ""`;
+      result.push(prepareCommonValue(param.name, value, false, true));
+    }
+  }
+
+  return credentialValue;
+}
+
+/**
+ * Process operation-level parameters
+ */
+function processOperationParameters(
+  method: ServiceOperation,
+  parameterMap: Record<string, SdkHttpParameterExampleValue>,
+  result: CommonValue[],
+  dpgContext: SdkContext,
+  isForTest: boolean,
+  envType: string
+): string {
   let subscriptionIdValue = isForTest
     ? `${envType}.SUBSCRIPTION_ID || "<SUBSCRIPTION_ID>"`
     : `"00000000-0000-0000-0000-00000000000"`;
 
-  // Process required parameters
   for (const param of method.operation.parameters) {
     if (
       param.optional === true ||
@@ -336,7 +421,6 @@ export function prepareCommonParameters(
     const exampleValue = parameterMap[param.serializedName];
     if (!exampleValue || !exampleValue.value) {
       if (isForTest && !param.optional) {
-        // Generate default values for required parameters without examples in tests
         result.push(
           prepareCommonValue(
             param.name,
@@ -346,7 +430,6 @@ export function prepareCommonParameters(
           )
         );
       } else if (!isForTest) {
-        // Report diagnostic if required parameter is missing in samples
         reportDiagnostic(dpgContext.program, {
           code: "required-sample-parameter",
           format: {
@@ -359,12 +442,8 @@ export function prepareCommonParameters(
       continue;
     }
 
-    if (
-      param.name.toLowerCase() === "subscriptionid" &&
-      dpgContext.arm &&
-      exampleValue
-    ) {
-      // For tests, always use env variable; for samples, use example value
+    // Special handling for ARM subscriptionId
+    if (param.name.toLowerCase() === "subscriptionid" && dpgContext.arm) {
       subscriptionIdValue = isForTest
         ? `${envType}.SUBSCRIPTION_ID || "<SUBSCRIPTION_ID>"`
         : serializeExampleValue(exampleValue.value);
@@ -379,6 +458,58 @@ export function prepareCommonParameters(
         param.onClient
       )
     );
+  }
+
+  return subscriptionIdValue;
+}
+
+export function prepareCommonParameters(
+  dpgContext: SdkContext,
+  method: ServiceOperation,
+  parameterMap: Record<string, SdkHttpParameterExampleValue>,
+  topLevelClient: SdkClientType<SdkServiceOperation>,
+  isForTest: boolean = false,
+  includeClientParams: boolean = false
+): CommonValue[] {
+  const envType = resolveReference(AzureTestDependencies.env);
+  const result: CommonValue[] = [];
+
+  let credentialValue: CommonValue | undefined;
+
+  // Handle client-level parameters when requested
+  if (includeClientParams) {
+    credentialValue = addClientLevelParameters(
+      dpgContext,
+      topLevelClient,
+      parameterMap,
+      result,
+      isForTest,
+      envType
+    );
+  } else {
+    // Handle credentials for non-client-param scenarios
+    credentialValue = isForTest
+      ? getCredentialTestValue(dpgContext, topLevelClient.clientInitialization)
+      : getCredentialSampleValue(
+          dpgContext,
+          topLevelClient.clientInitialization
+        );
+  }
+
+  // Process operation parameters
+  const subscriptionIdValue = processOperationParameters(
+    method,
+    parameterMap,
+    result,
+    dpgContext,
+    isForTest,
+    envType
+  );
+
+  // For ARM clients, add credential first, then subscriptionId
+  if (dpgContext.arm && credentialValue) {
+    result.unshift(credentialValue);
+    credentialValue = undefined; // Clear to avoid adding again
   }
 
   // Add subscriptionId for ARM clients if needed
@@ -400,9 +531,7 @@ export function prepareCommonParameters(
     ) {
       for (const prop of bodyParam.type.properties) {
         const propExample = bodyExample.value.value[prop.name];
-        if (!propExample) {
-          continue;
-        }
+        if (!propExample) continue;
         result.push(
           prepareCommonValue(
             prop.name,
@@ -445,6 +574,11 @@ export function prepareCommonParameters(
         );
       }
     });
+
+  // Add credential parameter at the end for non-ARM clients
+  if (credentialValue && !dpgContext.arm) {
+    result.push(credentialValue);
+  }
 
   return result;
 }
