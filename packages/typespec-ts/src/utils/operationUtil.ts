@@ -15,6 +15,7 @@ import {
 } from "@azure-tools/rlc-common";
 import { getLroMetadata } from "@azure-tools/typespec-azure-core";
 import {
+  getDisablePageable,
   getHttpOperationWithCache,
   getWireName,
   InitializedByFlags,
@@ -43,7 +44,12 @@ import {
   HttpStatusCodesEntry
 } from "@typespec/http";
 import { SdkContext } from "./interfaces.js";
-import { KnownMediaType, knownMediaType } from "./mediaTypes.js";
+import {
+  KnownMediaType,
+  knownMediaType,
+  isMediaTypeXml,
+  isMediaTypeMultipart
+} from "./mediaTypes.js";
 import { isByteOrByteUnion } from "./modelUtils.js";
 import { getOperationNamespaceInterfaceName } from "./namespaceUtils.js";
 import { resolveReference } from "../framework/reference.js";
@@ -198,6 +204,34 @@ export function isBinaryPayload(
     }
   }
   return false;
+}
+
+/**
+ * Checks if the content type(s) indicate XML payload
+ */
+export function isXmlPayload(contentType: string | string[]): boolean {
+  const contentTypes = Array.isArray(contentType) ? contentType : [contentType];
+  return contentTypes.some((ct) => isMediaTypeXml(ct));
+}
+
+/**
+ * Checks if the content type(s) indicate multipart payload (multipart/mixed, multipart/form-data, etc.)
+ */
+export function isMultipartPayload(contentType: string | string[]): boolean {
+  return isMediaTypeMultipart(contentType);
+}
+
+/**
+ * Checks if the operation supports multiple content types (e.g., both JSON and XML)
+ */
+export function hasDualFormatSupport(contentTypes: string[]): boolean {
+  const hasJson = contentTypes.some(
+    (ct) => knownMediaType(ct) === KnownMediaType.Json
+  );
+  const hasXml = contentTypes.some(
+    (ct) => knownMediaType(ct) === KnownMediaType.Xml
+  );
+  return hasJson && hasXml;
 }
 
 export function isLongRunningOperation(
@@ -391,7 +425,15 @@ export function extractPageDetails(
   return undefined;
 }
 
-export function isPagingOperation(program: Program, operation: HttpOperation) {
+export function isPagingOperation(
+  dpgContext: SdkContext,
+  operation: HttpOperation
+) {
+  const { program } = dpgContext;
+  if (getDisablePageable(dpgContext, operation.operation)) {
+    return false;
+  }
+
   return extractPageDetails(program, operation) !== undefined;
 }
 
@@ -438,14 +480,13 @@ function findRootSourceProperty(property: ModelProperty): ModelProperty {
 }
 
 export function hasPagingOperations(client: SdkClient, dpgContext: SdkContext) {
-  const program = dpgContext.program;
   for (const op of listOperationsUnderRLCClient(client)) {
     const route = getHttpOperationWithCache(dpgContext, op);
     // ignore overload base operation
     if (route.overloads && route.overloads?.length > 0) {
       continue;
     }
-    if (isPagingOperation(program, route)) {
+    if (isPagingOperation(dpgContext, route)) {
       return true;
     }
   }
@@ -461,7 +502,8 @@ export function hasCollectionFormatInfo(
     getHasSsvCollection(paramType, paramFormat) ||
     getHasTsvCollection(paramType, paramFormat) ||
     getHasCsvCollection(paramType, paramFormat) ||
-    getHasPipeCollection(paramType, paramFormat)
+    getHasPipeCollection(paramType, paramFormat) ||
+    getHasNewlineCollection(paramType, paramFormat)
   );
 }
 
@@ -503,50 +545,96 @@ function getHasMultiCollection(
 ) {
   return (
     ((includeQuery && paramType === "query") || paramType === "header") &&
-    paramFormat === "multi"
+    paramFormat === KnownCollectionFormat.Multi
   );
 }
 function getHasSsvCollection(paramType: string, paramFormat: string) {
-  return paramType === "query" && paramFormat === "ssv";
+  return (
+    (paramType === "query" || paramType === "property") &&
+    paramFormat === KnownCollectionFormat.Ssv
+  );
 }
 
 function getHasTsvCollection(paramType: string, paramFormat: string) {
-  return paramType === "query" && paramFormat === "tsv";
+  return paramType === "query" && paramFormat === KnownCollectionFormat.Tsv;
 }
 
 function getHasCsvCollection(paramType: string, paramFormat: string) {
-  return paramType === "header" && paramFormat === "csv";
+  return (
+    (paramType === "header" || paramType === "property") &&
+    paramFormat === KnownCollectionFormat.Csv
+  );
 }
 
 function getHasPipeCollection(paramType: string, paramFormat: string) {
-  return paramType === "query" && paramFormat === "pipes";
+  return (
+    (paramType === "query" || paramType === "property") &&
+    paramFormat === KnownCollectionFormat.Pipes
+  );
 }
 
-export function getCollectionFormatHelper(
-  paramType: string,
-  paramFormat: string
-) {
-  if (getHasMultiCollection(paramType, paramFormat, false)) {
-    return resolveReference(SerializationHelpers.buildMultiCollection);
-  }
+function getHasNewlineCollection(paramType: string, paramFormat: string) {
+  return (
+    paramType === "property" && paramFormat === KnownCollectionFormat.Newline
+  );
+}
 
-  if (getHasPipeCollection(paramType, paramFormat)) {
-    return resolveReference(SerializationHelpers.buildPipeCollection);
+export function getCollectionFormatHelper(format: string) {
+  switch (format) {
+    case KnownCollectionFormat.Multi:
+      return resolveReference(SerializationHelpers.buildMultiCollection);
+    case KnownCollectionFormat.Pipes:
+      return resolveReference(SerializationHelpers.buildPipeCollection);
+    case KnownCollectionFormat.Ssv:
+      return resolveReference(SerializationHelpers.buildSsvCollection);
+    case KnownCollectionFormat.Tsv:
+      return resolveReference(SerializationHelpers.buildTsvCollection);
+    case KnownCollectionFormat.Csv:
+      return resolveReference(SerializationHelpers.buildCsvCollection);
+    case KnownCollectionFormat.Newline:
+      return resolveReference(SerializationHelpers.buildNewlineCollection);
+    default:
+      return undefined;
   }
+}
 
-  if (getHasSsvCollection(paramType, paramFormat)) {
-    return resolveReference(SerializationHelpers.buildSsvCollection);
+export function getCollectionFormatParseHelper(format: string) {
+  switch (format) {
+    case KnownCollectionFormat.Pipes:
+      return resolveReference(SerializationHelpers.parsePipeCollection);
+    case KnownCollectionFormat.Ssv:
+      return resolveReference(SerializationHelpers.parseSsvCollection);
+    case KnownCollectionFormat.Csv:
+      return resolveReference(SerializationHelpers.parseCsvCollection);
+    case KnownCollectionFormat.Newline:
+      return resolveReference(SerializationHelpers.parseNewlineCollection);
+    default:
+      return undefined;
   }
+}
 
-  if (getHasTsvCollection(paramType, paramFormat)) {
-    return resolveReference(SerializationHelpers.buildTsvCollection);
+export function getCollectionFormatFromArrayEncoding(encoding: string) {
+  switch (encoding) {
+    case "pipeDelimited":
+      return KnownCollectionFormat.Pipes;
+    case "spaceDelimited":
+      return KnownCollectionFormat.Ssv;
+    case "commaDelimited":
+      return KnownCollectionFormat.Csv;
+    case "newlineDelimited":
+      return KnownCollectionFormat.Newline;
+    default:
+      return undefined;
   }
+}
 
-  if (getHasCsvCollection(paramType, paramFormat)) {
-    return resolveReference(SerializationHelpers.buildCsvCollection);
-  }
-
-  return undefined;
+export enum KnownCollectionFormat {
+  Csv = "csv",
+  Ssv = "ssv",
+  Tsv = "tsv",
+  Pipes = "pipes",
+  Newline = "newline",
+  Multi = "multi"
 }
 
 export function getCustomRequestHeaderNameForOperation(
@@ -677,6 +765,41 @@ export function getMethodHierarchiesMap(
     }
   }
   return operationHierarchiesMap;
+}
+
+export function isTenantLevelOperation(
+  operation: ServiceOperation,
+  client: SdkClientType<SdkServiceOperation>
+): boolean {
+  // Check if this operation has a subscriptionId path parameter
+  const subscriptionIdParam = operation.operation.parameters?.find(
+    (param) =>
+      param.name.toLowerCase() === "subscriptionid" && param.kind === "path"
+  );
+
+  if (subscriptionIdParam) {
+    // The operation has a client-level subscriptionId parameter, then it's not tenant-level
+    if (subscriptionIdParam.onClient) {
+      return false;
+    }
+  } else {
+    // Skip tenant-level internal ARM APIs
+    // Ref: https://armwiki.azurewebsites.net/rpaas/operations_auto_gen.html#special-cases
+    const pathLC = operation.operation.path.toLowerCase();
+    // Get the provider namespace from the client
+    const clientNamespaceLC = client.namespace.toLowerCase();
+    if (
+      operation.crossLanguageDefinitionId?.toLowerCase() ===
+        "azure.resourcemanager.operations.list" ||
+      pathLC.includes(`${clientNamespaceLC}/checknameavailability`)
+    ) {
+      return false;
+    }
+  }
+
+  // The operation has no subscriptionId parameter or has method-level subscriptionId parameter
+  // Considered as tenant-level
+  return true;
 }
 
 function resolveParameterNameConflict(

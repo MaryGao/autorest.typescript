@@ -37,7 +37,7 @@ export function _stopTestProfileRunSend(
     "/test-profile-runs/{testProfileRunId}:stop{?api%2Dversion}",
     {
       testProfileRunId: testProfileRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -47,10 +47,7 @@ export function _stopTestProfileRunSend(
     .path(path)
     .post({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -71,11 +68,7 @@ export async function stopTestProfileRun(
   testProfileRunId: string,
   options: StopTestProfileRunOptionalParams = { requestOptions: {} },
 ): Promise<TestProfileRun> {
-  const result = await _stopTestProfileRunSend(
-    context,
-    testProfileRunId,
-    options,
-  );
+  const result = await _stopTestProfileRunSend(context, testProfileRunId, options);
   return _stopTestProfileRunDeserialize(result);
 }
 
@@ -86,7 +79,7 @@ export function _listTestProfileRunsSend(
   const path = expandUrlTemplate(
     "/test-profile-runs{?api%2Dversion,maxpagesize,minStartDateTime,maxStartDateTime,minEndDateTime,maxEndDateTime,createdDateStartTime,createdDateEndTime,testProfileRunIds,testProfileIds,statuses}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       maxpagesize: options?.maxpagesize,
       minStartDateTime: !options?.minStartDateTime
         ? options?.minStartDateTime
@@ -118,10 +111,7 @@ export function _listTestProfileRunsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -146,7 +136,11 @@ export function listTestProfileRuns(
     () => _listTestProfileRunsSend(context, options),
     _listTestProfileRunsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -159,7 +153,7 @@ export function _getTestProfileRunSend(
     "/test-profile-runs/{testProfileRunId}{?api%2Dversion}",
     {
       testProfileRunId: testProfileRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -169,10 +163,7 @@ export function _getTestProfileRunSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -193,11 +184,7 @@ export async function getTestProfileRun(
   testProfileRunId: string,
   options: GetTestProfileRunOptionalParams = { requestOptions: {} },
 ): Promise<TestProfileRun> {
-  const result = await _getTestProfileRunSend(
-    context,
-    testProfileRunId,
-    options,
-  );
+  const result = await _getTestProfileRunSend(context, testProfileRunId, options);
   return _getTestProfileRunDeserialize(result);
 }
 
@@ -210,15 +197,13 @@ export function _deleteTestProfileRunSend(
     "/test-profile-runs/{testProfileRunId}{?api%2Dversion}",
     {
       testProfileRunId: testProfileRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
 export async function _deleteTestProfileRunDeserialize(
@@ -238,11 +223,7 @@ export async function deleteTestProfileRun(
   testProfileRunId: string,
   options: DeleteTestProfileRunOptionalParams = { requestOptions: {} },
 ): Promise<void> {
-  const result = await _deleteTestProfileRunSend(
-    context,
-    testProfileRunId,
-    options,
-  );
+  const result = await _deleteTestProfileRunSend(context, testProfileRunId, options);
   return _deleteTestProfileRunDeserialize(result);
 }
 
@@ -256,7 +237,7 @@ export function _createOrUpdateTestProfileRunSend(
     "/test-profile-runs/{testProfileRunId}{?api%2Dversion}",
     {
       testProfileRunId: testProfileRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -267,10 +248,7 @@ export function _createOrUpdateTestProfileRunSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testProfileRunSerializer(body),
     });
 }
@@ -293,11 +271,6 @@ export async function createOrUpdateTestProfileRun(
   body: TestProfileRun,
   options: CreateOrUpdateTestProfileRunOptionalParams = { requestOptions: {} },
 ): Promise<TestProfileRun> {
-  const result = await _createOrUpdateTestProfileRunSend(
-    context,
-    testProfileRunId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateTestProfileRunSend(context, testProfileRunId, body, options);
   return _createOrUpdateTestProfileRunDeserialize(result);
 }

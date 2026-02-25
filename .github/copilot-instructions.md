@@ -7,10 +7,10 @@ This repository focuses on the TypeSpec TypeScript emitter, which generates Type
 ## Working Effectively
 
 - **Bootstrap, build, and test the repository:**
-  - `npm install -g @microsoft/rush` -- Install Rush globally (takes ~2 minutes)
-  - `PUPPETEER_SKIP_DOWNLOAD=true rush update` -- Install dependencies, takes ~8 seconds. NEVER CANCEL. Set timeout to 15+ minutes.
-  - `rush build` -- Build all packages, takes ~12 seconds. NEVER CANCEL. Set timeout to 20+ minutes.
-  - `rush format` -- Format all code, takes ~6 seconds. NEVER CANCEL. Set timeout to 10+ minutes.
+  - `npm install -g pnpm` -- Install pnpm globally (takes ~2 minutes)
+  - `PUPPETEER_SKIP_DOWNLOAD=true pnpm install` -- Install dependencies, takes ~8 seconds. NEVER CANCEL. Set timeout to 15+ minutes.
+  - `pnpm build` -- Build all packages, takes ~12 seconds. NEVER CANCEL. Set timeout to 20+ minutes.
+  - `pnpm format` -- Format all code, takes ~6 seconds. NEVER CANCEL. Set timeout to 10+ minutes.
 
 - **Run tests:**
   - Unit tests: `npm run unit-test` in `packages/typespec-ts/` -- takes ~2.5 minutes. NEVER CANCEL. Set timeout to 10+ minutes.
@@ -27,9 +27,9 @@ This repository focuses on the TypeSpec TypeScript emitter, which generates Type
   - All integration tests: `npm run integration-test-ci` -- takes ~1+ hour. NEVER CANCEL. Set timeout to 90+ minutes.
 
 - **Validation steps before committing:**
-  - `rush update` -- Ensure dependencies are correctly installed (takes ~8 seconds)
-  - `rush build` -- Build all packages and verify no build issues (takes ~12 seconds)
-  - `rush format` -- Format code
+  - `pnpm install` -- Ensure dependencies are correctly installed (takes ~8 seconds)
+  - `pnpm build` -- Build all packages and verify no build issues (takes ~12 seconds)
+  - `pnpm format` -- Format code
   - `npm run lint` in `packages/typespec-ts/` -- Lint TypeSpec emitter (takes ~6 seconds)
   - `npm run check-format` in `packages/typespec-ts/` -- Check code formatting (takes ~5 seconds)
 
@@ -98,6 +98,79 @@ The TypeSpec test project (`typespec-test`) which is smoke test for TypeSpec emi
 
 The TypeSpec TypeScript emitter (`typespec-ts`) generates TypeScript client libraries from [TypeSpec](https://typespec.io/) specifications. The emitter supports two distinct SDK styles: RLC libraries and Modular libraries.
 
+## Implementing New Features in the TypeSpec Emitter
+
+When implementing new features (e.g., serialization formats, helpers, utilities), follow these patterns:
+
+### Static Helpers Architecture
+
+Static helpers are runtime utilities that get copied into generated client libraries. They are used for common operations like serialization, pagination, polling, etc.
+
+**Key directories:**
+- `packages/typespec-ts/static/static-helpers/` - Runtime helper implementations (TypeScript source files)
+- `packages/typespec-ts/src/modular/static-helpers-metadata.ts` - Registry of available static helpers with their metadata
+- `packages/typespec-ts/src/modular/external-dependencies.ts` - External npm package dependencies that helpers may need
+
+**Adding a new static helper:**
+
+1. **Create the helper file** in `static/static-helpers/` (e.g., `static/static-helpers/serialization/xml-helpers.ts`)
+2. **Register the helper** in `src/modular/static-helpers-metadata.ts` by adding an entry to the `StaticHelpers` object
+3. **Add external dependencies** if needed in `src/modular/external-dependencies.ts`
+4. **Update `load-static-helpers.ts`** in `src/framework/` to include the new helper in the loading logic
+
+**Reference framework pattern:**
+- Use `refkey("HelperName")` to create references to helpers
+- Use `resolveReference(context, refkey("HelperName"))` to resolve and import helpers in generated code
+- The framework automatically handles imports and deduplication
+
+### Unit Tests for Static Helpers
+
+Unit tests for static helpers are in `packages/typespec-ts/test-next/unit/static-helpers/`.
+
+**Running specific unit tests:**
+```bash
+cd packages/typespec-ts
+npx vitest run ./test-next/unit/static-helpers/your-helper.test.ts --reporter=verbose
+```
+
+**Test patterns:**
+- Import directly from the static helper source: `import { ... } from "../../../static/static-helpers/..."`
+- Test both serialization and deserialization round-trips
+- Test edge cases: null/undefined, empty arrays, whitespace preservation, etc.
+
+### Regenerating Specific Integration Tests
+
+To regenerate a specific integration test client (faster than regenerating all):
+
+```bash
+cd packages/typespec-ts
+npx tsx ./test/commands/gen-cadl-ranch.js --tag=azure-modular --filter=payload/xml
+```
+
+Replace `payload/xml` with the path of the specific test you want to regenerate.
+
+### Integration Test Locations
+
+- **RLC tests:** `packages/typespec-ts/test/integration/*.spec.ts`
+- **Modular tests:** `packages/typespec-ts/test/modularIntegration/*.spec.ts`
+- **Azure RLC tests:** `packages/typespec-ts/test/azureIntegration/*.spec.ts`
+- **Azure Modular tests:** `packages/typespec-ts/test/azureModularIntegration/*.spec.ts`
+
+**Generated client code locations:**
+- RLC: `packages/typespec-ts/test/integration/generated/`
+- Modular: `packages/typespec-ts/test/modularIntegration/generated/`
+- Azure RLC: `packages/typespec-ts/test/azureIntegration/generated/`
+- Azure Modular: `packages/typespec-ts/test/azureModularIntegration/generated/`
+
+### Serialization and Content Type Detection
+
+When implementing format-specific serialization (JSON, XML, etc.):
+
+1. **TCGC metadata:** Use `@azure-tools/typespec-client-generator-core` to get serialization options (e.g., `serializationOptions.xml`)
+2. **Content type detection:** Check `contentTypes` array on operations to determine request/response format
+3. **Conditional serialization:** Generate serializers that detect content type at runtime when operations support multiple formats
+
+
 ## How to Upgrade TypeSpec dependencies for @azure-tools/typespec-ts (packagest/typespec-ts)
 
 When upgrading TypeSpec dependencies only work on `packages/typespec-ts/` and `packages/typespec-test/` . `packages/rlc-common` and `packages/autorest.typescript` should not be edited.
@@ -105,14 +178,14 @@ When upgrading TypeSpec dependencies only work on `packages/typespec-ts/` and `p
 - Identify dependencies within the @typespec or @azure-tools npm-scopes under "dependencies", "devDependencies" and "peerDependencies" in package.json
 - You should resolve the version in "next" tag for dependencies on `@typespec/http-specs`, `@typespec/spector`, `@azure-tools/azure-http-specs`, and `@typespec/spec-api`
 - You should resolve the version in "latest" tag for the other dependencies
-- Run "rush update" after editing the dependencies in package.json
+- Run "pnpm install" after editing the dependencies in package.json
 - TypeSpec dependencies means any dependencies starting with `@typespec/` or `@azure-tools/` as these are relevant to TypeSpec and Azure tools.
 - Do not update dependency for @typespec/ts-http-runtime.
 - For spector relevant dependencies, the latest version which is tagged with `next` on npm including `@typespec/http-specs`, `@typespec/spector`, `@azure-tools/azure-http-specs`, and `@typespec/spec-api`.
 - For other dependencies, check the latest versions which is tagged with `latest` on npm and update them accordingly.
-- After updating the versions, run `rush update` to ensure all dependencies are correctly installed and the lock files are updated.
-- Do run `rush build` to build the entire monorepo to check if any building issues introduced by upgrading.
-- Do run `rush format` to format the codebase.
+- After updating the versions, run `pnpm install` to ensure all dependencies are correctly installed and the lock files are updated.
+- Do run `pnpm build` to build the entire monorepo to check if any building issues introduced by upgrading.
+- Do run `pnpm format` to format the codebase.
 - Do run `npm run unit-test` under `packages/typespec-ts/` to validate our Unit Test and follow the below instructions to fix any test failures.
 - Do run `npm run copy:typespec` to copy the files which integration test may use.
 - Do run `npm run integration-test-ci:azure-modular` under `packages/typespec-ts/` to validate our Azure Modular Integration Test and follow the below instructions to fix any test failures. Please do not skip this test. This would take around 30 min.
@@ -181,9 +254,9 @@ When preparing a release, we need to bump package versions and update changelogs
    - Update any internal package references if version changes affect dependencies
 
 7. **Validation Steps**
-   - Run `rush update` to ensure all dependencies are correctly installed (takes ~8 seconds)
-   - Run `rush build` to build all packages and verify no build issues (takes ~12 seconds)
-   - Run `rush format` to format the codebase (takes ~6 seconds)
+   - Run `pnpm install` to ensure all dependencies are correctly installed (takes ~8 seconds)
+   - Run `pnpm build` to build all packages and verify no build issues (takes ~12 seconds)
+   - Run `pnpm format` to format the codebase (takes ~6 seconds)
    - Run unit tests: `npm run unit-test` in `packages/typespec-ts/` (takes ~2.5 minutes)
    - Optionally run smoke tests: `npm run smoke-test` in `packages/typespec-test/` (takes ~10 minutes). **Wait for "All specs succeeded!" message.**
    - Optionally run integration tests to ensure end-to-end functionality works
@@ -200,11 +273,11 @@ When preparing a release, we need to bump package versions and update changelogs
 - Ensure changelog dates match the actual release date
 - Verify PR links are correct and accessible
 - Check that version increments follow the established rules
-- Always validate changes with rush build before committing
+- Always validate changes with pnpm build before committing
 
 ## How to run and fix test failures in TypeSpec TypeScript emitter
 
-Run `rush update` and `rush build` before running tests.
+Run `pnpm install` and `pnpm build` before running tests.
 
 The tests in the TypeSpec TypeScript emitter can be categorized into:
 

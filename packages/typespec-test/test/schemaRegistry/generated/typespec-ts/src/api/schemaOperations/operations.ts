@@ -38,16 +38,14 @@ export function _registerSchemaSend(
   name: string,
   content: Uint8Array,
   contentType: SchemaContentTypeValues,
-  options: SchemaOperationsRegisterSchemaOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsRegisterSchemaOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/$schemaGroups/{groupName}/schemas/{name}{?api%2Dversion}",
     {
       groupName: groupName,
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -62,9 +60,7 @@ export function _registerSchemaSend(
     });
 }
 
-export async function _registerSchemaDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _registerSchemaDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -80,18 +76,9 @@ export async function registerSchema(
   name: string,
   content: Uint8Array,
   contentType: SchemaContentTypeValues,
-  options: SchemaOperationsRegisterSchemaOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsRegisterSchemaOptionalParams = { requestOptions: {} },
 ): Promise<void> {
-  const result = await _registerSchemaSend(
-    context,
-    groupName,
-    name,
-    content,
-    contentType,
-    options,
-  );
+  const result = await _registerSchemaSend(context, groupName, name, content, contentType, options);
   return _registerSchemaDeserialize(result);
 }
 
@@ -101,16 +88,14 @@ export function _getSchemaIdByContentSend(
   name: string,
   contentType: SchemaContentTypeValues,
   schemaContent: Uint8Array,
-  options: SchemaOperationsGetSchemaIdByContentOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsGetSchemaIdByContentOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/$schemaGroups/{groupName}/schemas/{name}:get-id{?api%2Dversion}",
     {
       groupName: groupName,
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -143,9 +128,7 @@ export async function getSchemaIdByContent(
   name: string,
   contentType: SchemaContentTypeValues,
   schemaContent: Uint8Array,
-  options: SchemaOperationsGetSchemaIdByContentOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsGetSchemaIdByContentOptionalParams = { requestOptions: {} },
 ): Promise<void> {
   const result = await _getSchemaIdByContentSend(
     context,
@@ -163,9 +146,7 @@ export function _getSchemaByVersionSend(
   groupName: string,
   name: string,
   schemaVersion: number,
-  options: SchemaOperationsGetSchemaByVersionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsGetSchemaByVersionOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/$schemaGroups/{groupName}/schemas/{name}/versions/{schemaVersion}{?api%2Dversion}",
@@ -173,15 +154,13 @@ export function _getSchemaByVersionSend(
       groupName: groupName,
       name: name,
       schemaVersion: schemaVersion,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .get({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).get({ ...operationOptionsToRequestParameters(options) });
 }
 
 export async function _getSchemaByVersionDeserialize(
@@ -192,9 +171,7 @@ export async function _getSchemaByVersionDeserialize(
     throw createRestError(result);
   }
 
-  return typeof result.body === "string"
-    ? stringToUint8Array(result.body, "base64")
-    : result.body;
+  return typeof result.body === "string" ? stringToUint8Array(result.body, "base64") : result.body;
 }
 
 /** Gets one specific version of one schema. */
@@ -203,17 +180,9 @@ export async function getSchemaByVersion(
   groupName: string,
   name: string,
   schemaVersion: number,
-  options: SchemaOperationsGetSchemaByVersionOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsGetSchemaByVersionOptionalParams = { requestOptions: {} },
 ): Promise<Uint8Array> {
-  const result = await _getSchemaByVersionSend(
-    context,
-    groupName,
-    name,
-    schemaVersion,
-    options,
-  );
+  const result = await _getSchemaByVersionSend(context, groupName, name, schemaVersion, options);
   return _getSchemaByVersionDeserialize(result);
 }
 
@@ -221,16 +190,14 @@ export function _listSchemaVersionsSend(
   context: Client,
   groupName: string,
   name: string,
-  options: SchemaOperationsListSchemaVersionsOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsListSchemaVersionsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/$schemaGroups/{groupName}/schemas/{name}/versions{?api%2Dversion}",
     {
       groupName: groupName,
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -240,10 +207,7 @@ export function _listSchemaVersionsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -263,16 +227,14 @@ export function listSchemaVersions(
   context: Client,
   groupName: string,
   name: string,
-  options: SchemaOperationsListSchemaVersionsOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsListSchemaVersionsOptionalParams = { requestOptions: {} },
 ): PagedAsyncIterableIterator<SchemaVersion> {
   return buildPagedAsyncIterator(
     context,
     () => _listSchemaVersionsSend(context, groupName, name, options),
     _listSchemaVersionsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2023-07-01" },
   );
 }
 
@@ -285,15 +247,13 @@ export function _getSchemaByIdSend(
     "/$schemaGroups/$schemas/{id}{?api%2Dversion}",
     {
       id: id,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .get({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).get({ ...operationOptionsToRequestParameters(options) });
 }
 
 export async function _getSchemaByIdDeserialize(
@@ -304,9 +264,7 @@ export async function _getSchemaByIdDeserialize(
     throw createRestError(result);
   }
 
-  return typeof result.body === "string"
-    ? stringToUint8Array(result.body, "base64")
-    : result.body;
+  return typeof result.body === "string" ? stringToUint8Array(result.body, "base64") : result.body;
 }
 
 /** Gets a registered schema by its unique ID.  Azure Schema Registry guarantees that ID is unique within a namespace. Operation response type is based on serialization of schema requested. */
@@ -321,14 +279,12 @@ export async function getSchemaById(
 
 export function _listSchemaGroupsSend(
   context: Client,
-  options: SchemaOperationsListSchemaGroupsOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsListSchemaGroupsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/$schemaGroups{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-07-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -338,10 +294,7 @@ export function _listSchemaGroupsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -359,15 +312,13 @@ export async function _listSchemaGroupsDeserialize(
 /** Gets the list of schema groups user is authorized to access. */
 export function listSchemaGroups(
   context: Client,
-  options: SchemaOperationsListSchemaGroupsOptionalParams = {
-    requestOptions: {},
-  },
+  options: SchemaOperationsListSchemaGroupsOptionalParams = { requestOptions: {} },
 ): PagedAsyncIterableIterator<SchemaGroup> {
   return buildPagedAsyncIterator(
     context,
     () => _listSchemaGroupsSend(context, options),
     _listSchemaGroupsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2023-07-01" },
   );
 }

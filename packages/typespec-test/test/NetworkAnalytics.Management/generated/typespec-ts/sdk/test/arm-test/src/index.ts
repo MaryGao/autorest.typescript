@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-import {
-  AzureClouds,
-  AzureSupportedClouds,
-} from "./static-helpers/cloudSettingHelpers.js";
+import { AzureClouds, AzureSupportedClouds } from "./static-helpers/cloudSettingHelpers.js";
 import {
   PageSettings,
   ContinuablePage,
@@ -12,6 +9,7 @@ import {
 } from "./static-helpers/pagingHelpers.js";
 
 export { NetworkAnalyticsApi } from "./networkAnalyticsApi.js";
+export { SimplePollerLike } from "./static-helpers/simplePollerHelpers.js";
 export { restorePoller, RestorePollerOptions } from "./restorePollerHelpers.js";
 export {
   Operation,
@@ -70,10 +68,12 @@ export {
   DataProductUserRole,
   RoleAssignmentDetail,
   ListRoleAssignments,
+  Client,
   KnownVersions,
 } from "./models/index.js";
 export { NetworkAnalyticsApiOptionalParams } from "./api/index.js";
 export {
+  DataProductsReadOptionalParams,
   DataProductsListBySubscriptionOptionalParams,
   DataProductsListByResourceGroupOptionalParams,
   DataProductsListRolesAssignmentsOptionalParams,

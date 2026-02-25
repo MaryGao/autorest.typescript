@@ -34,6 +34,12 @@ interface D {
 Generated Models.
 
 ```ts models
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface AWidgetData */
 export interface AWidgetData {
   kind: string;
@@ -49,7 +55,7 @@ export function aWidgetDataDeserializer(item: any): AWidgetData {
 export type AWidgetDataUnion = AoaiModelConfig | MaasModelConfig | AWidgetData;
 
 export function aWidgetDataUnionDeserializer(item: any): AWidgetDataUnion {
-  switch (item.kind) {
+  switch (item["kind"]) {
     case "kind0":
       return aoaiModelConfigDeserializer(item as AoaiModelConfig);
 
@@ -165,15 +171,19 @@ interface D {
 Generated Models.
 
 ```ts models
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface DiscountTypeProperties */
 export interface DiscountTypeProperties {
   discountType: DiscountType;
   discountPercentage?: number;
 }
 
-export function discountTypePropertiesDeserializer(
-  item: any,
-): DiscountTypeProperties {
+export function discountTypePropertiesDeserializer(item: any): DiscountTypeProperties {
   return {
     discountType: item["discountType"],
     discountPercentage: item["discountPercentage"],
@@ -187,14 +197,10 @@ export type DiscountTypePropertiesUnion =
   | DiscountTypeProductSku
   | DiscountTypeProperties;
 
-export function discountTypePropertiesUnionDeserializer(
-  item: any,
-): DiscountTypePropertiesUnion {
-  switch (item.discountType) {
+export function discountTypePropertiesUnionDeserializer(item: any): DiscountTypePropertiesUnion {
+  switch (item["discountType"]) {
     case "ProductFamily":
-      return discountTypeProductFamilyDeserializer(
-        item as DiscountTypeProductFamily,
-      );
+      return discountTypeProductFamilyDeserializer(item as DiscountTypeProductFamily);
 
     case "Product":
       return discountTypeProductDeserializer(item as DiscountTypeProduct);
@@ -221,9 +227,7 @@ export interface DiscountTypeProductFamily extends DiscountTypeProperties {
   discountType: "ProductFamily";
 }
 
-export function discountTypeProductFamilyDeserializer(
-  item: any,
-): DiscountTypeProductFamily {
+export function discountTypeProductFamilyDeserializer(item: any): DiscountTypeProductFamily {
   return {
     discountType: item["discountType"],
     discountPercentage: item["discountPercentage"],
@@ -238,9 +242,7 @@ export interface DiscountTypeProduct extends DiscountTypeProperties {
   discountType: "Product";
 }
 
-export function discountTypeProductDeserializer(
-  item: any,
-): DiscountTypeProduct {
+export function discountTypeProductDeserializer(item: any): DiscountTypeProduct {
   return {
     discountType: item["discountType"],
     discountPercentage: item["discountPercentage"],
@@ -257,9 +259,7 @@ export interface DiscountTypeProductSku extends DiscountTypeProperties {
   discountType: "Sku";
 }
 
-export function discountTypeProductSkuDeserializer(
-  item: any,
-): DiscountTypeProductSku {
+export function discountTypeProductSkuDeserializer(item: any): DiscountTypeProductSku {
   return {
     discountType: item["discountType"],
     discountPercentage: item["discountPercentage"],
@@ -326,6 +326,12 @@ mustEmptyDiagnostic: false
 Generated Models.
 
 ```ts models
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface DocumentIngress */
 export interface DocumentIngress {
   documentType: DocumentType;
@@ -368,9 +374,7 @@ export function documentIngressDeserializer(item: any): DocumentIngress {
 /** Alias for DocumentIngressUnion */
 export type DocumentIngressUnion = Request | Exception | DocumentIngress;
 
-export function documentIngressUnionSerializer(
-  item: DocumentIngressUnion,
-): any {
+export function documentIngressUnionSerializer(item: DocumentIngressUnion): any {
   switch (item.documentType) {
     case "Request":
       return requestSerializer(item as Request);
@@ -383,10 +387,8 @@ export function documentIngressUnionSerializer(
   }
 }
 
-export function documentIngressUnionDeserializer(
-  item: any,
-): DocumentIngressUnion {
-  switch (item.documentType) {
+export function documentIngressUnionDeserializer(item: any): DocumentIngressUnion {
+  switch (item["DocumentType"]) {
     case "Request":
       return requestDeserializer(item as Request);
 
@@ -573,6 +575,12 @@ mustEmptyDiagnostic: false
 Generated Models.
 
 ```ts models
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface Animal */
 export interface Animal {
   /** The kind of animal */
@@ -608,7 +616,7 @@ export function animalUnionSerializer(item: AnimalUnion): any {
 }
 
 export function animalUnionDeserializer(item: any): AnimalUnion {
-  switch (item.kind) {
+  switch (item["kind"]) {
     case "pet":
     case "dog":
       return petUnionDeserializer(item as PetUnion);
@@ -651,7 +659,7 @@ export function petUnionSerializer(item: PetUnion): any {
 }
 
 export function petUnionDeserializer(item: any): PetUnion {
-  switch (item.kind) {
+  switch (item["kind"]) {
     case "dog":
       return dogDeserializer(item as Dog);
 
@@ -668,12 +676,7 @@ export interface Dog extends Pet {
 }
 
 export function dogSerializer(item: Dog): any {
-  return {
-    kind: item["kind"],
-    trained: item["trained"],
-    name: item["name"],
-    breed: item["breed"],
-  };
+  return { kind: item["kind"], trained: item["trained"], name: item["name"], breed: item["breed"] };
 }
 
 export function dogDeserializer(item: any): Dog {

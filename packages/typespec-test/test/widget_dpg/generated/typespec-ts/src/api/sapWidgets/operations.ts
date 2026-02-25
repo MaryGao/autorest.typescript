@@ -56,15 +56,11 @@ export function _analyzeWidgetSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .post({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -75,6 +71,7 @@ export async function _analyzeWidgetDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -105,19 +102,15 @@ export function _deleteWidgetSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _deleteWidgetDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _deleteWidgetDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -148,27 +141,22 @@ export function _updateWidgetSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: { weight: options?.weight, color: options?.color },
     });
 }
 
-export async function _updateWidgetDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Widget> {
+export async function _updateWidgetDeserialize(result: PathUncheckedResponse): Promise<Widget> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -198,7 +186,7 @@ export function _createOrReplaceSend(
     "/widgets/widgets/createOrReplace/users/{name}{?api%2Dversion}",
     {
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "1.0.0",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -209,17 +197,12 @@ export function _createOrReplaceSend(
     .put({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: sapUserSerializer(resource),
     });
 }
 
-export async function _createOrReplaceDeserialize(
-  result: PathUncheckedResponse,
-): Promise<SAPUser> {
+export async function _createOrReplaceDeserialize(result: PathUncheckedResponse): Promise<SAPUser> {
   const expectedStatuses = ["201", "200", "202"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -235,18 +218,13 @@ export function createOrReplace(
   resource: SAPUser,
   options: SAPWidgetsCreateOrReplaceOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<SAPUser>, SAPUser> {
-  return getLongRunningPoller(
-    context,
-    _createOrReplaceDeserialize,
-    ["201", "200", "202"],
-    {
-      updateIntervalInMs: options?.updateIntervalInMs,
-      abortSignal: options?.abortSignal,
-      getInitialResponse: () =>
-        _createOrReplaceSend(context, name, resource, options),
-      resourceLocationConfig: "original-uri",
-    },
-  ) as PollerLike<OperationState<SAPUser>, SAPUser>;
+  return getLongRunningPoller(context, _createOrReplaceDeserialize, ["201", "200", "202"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () => _createOrReplaceSend(context, name, resource, options),
+    resourceLocationConfig: "original-uri",
+    apiVersion: context.apiVersion ?? "1.0.0",
+  }) as PollerLike<OperationState<SAPUser>, SAPUser>;
 }
 
 export function _createWidgetSend(
@@ -255,27 +233,22 @@ export function _createWidgetSend(
   color: "red" | "blue",
   options: SAPWidgetsCreateWidgetOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path("/widgets")
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: { weight: weight, color: color },
     });
 }
 
-export async function _createWidgetDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Widget> {
+export async function _createWidgetDeserialize(result: PathUncheckedResponse): Promise<Widget> {
   const expectedStatuses = ["201"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -312,25 +285,20 @@ export function _getWidgetSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _getWidgetDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Widget> {
+export async function _getWidgetDeserialize(result: PathUncheckedResponse): Promise<Widget> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -363,15 +331,11 @@ export function _queryWidgetsPagesSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .post({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -382,6 +346,7 @@ export async function _queryWidgetsPagesDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -419,15 +384,11 @@ export function _listWidgetsPagesSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -438,6 +399,7 @@ export async function _listWidgetsPagesDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -468,7 +430,6 @@ export function _sapListWidgetsSend(
   utcDateHeader: Date,
   options: SAPWidgetsSAPListWidgetsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context.path("/widgets").get({
     ...operationOptionsToRequestParameters(options),
     headers: {
@@ -476,8 +437,7 @@ export function _sapListWidgetsSend(
       ...(options?.optionalHeader !== undefined
         ? { "optional-header": options?.optionalHeader }
         : {}),
-      ...(options?.nullableOptionalHeader !== undefined &&
-      options?.nullableOptionalHeader !== null
+      ...(options?.nullableOptionalHeader !== undefined && options?.nullableOptionalHeader !== null
         ? { "nullable-optional-header": options?.nullableOptionalHeader }
         : {}),
       "bytes-header": uint8ArrayToString(bytesHeader, "base64"),
@@ -495,8 +455,7 @@ export function _sapListWidgetsSend(
               : options?.optionalDateHeader.toUTCString(),
           }
         : {}),
-      ...(options?.nullableDateHeader !== undefined &&
-      options?.nullableDateHeader !== null
+      ...(options?.nullableDateHeader !== undefined && options?.nullableDateHeader !== null
         ? {
             "nullable-date-header": !options?.nullableDateHeader
               ? options?.nullableDateHeader
@@ -509,13 +468,12 @@ export function _sapListWidgetsSend(
   });
 }
 
-export async function _sapListWidgetsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Widget[]> {
+export async function _sapListWidgetsDeserialize(result: PathUncheckedResponse): Promise<Widget[]> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 

@@ -30,19 +30,14 @@ import {
 export function _detectUnivariateChangePointSend(
   context: Client,
   options: UnivariateUnivariateChangePointDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateChangePointOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateChangePointOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   return context
     .path("/timeseries/changepoint/detect")
     .post({
       ...operationOptionsToRequestParameters(optionalParams),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...optionalParams.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...optionalParams.requestOptions?.headers },
       body: univariateUnivariateChangePointDetectionOptionsSerializer(options),
     });
 }
@@ -54,46 +49,34 @@ export async function _detectUnivariateChangePointDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = univariateAnomalyDetectorErrorDeserializer(result.body);
+
     throw error;
   }
 
-  return univariateUnivariateChangePointDetectionResultDeserializer(
-    result.body,
-  );
+  return univariateUnivariateChangePointDetectionResultDeserializer(result.body);
 }
 
 /** Evaluate change point score of every series point */
 export async function detectUnivariateChangePoint(
   context: Client,
   options: UnivariateUnivariateChangePointDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateChangePointOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateChangePointOptionalParams = { requestOptions: {} },
 ): Promise<UnivariateUnivariateChangePointDetectionResult> {
-  const result = await _detectUnivariateChangePointSend(
-    context,
-    options,
-    optionalParams,
-  );
+  const result = await _detectUnivariateChangePointSend(context, options, optionalParams);
   return _detectUnivariateChangePointDeserialize(result);
 }
 
 export function _detectUnivariateLastPointSend(
   context: Client,
   options: UnivariateUnivariateDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateLastPointOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateLastPointOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   return context
     .path("/timeseries/last/detect")
     .post({
       ...operationOptionsToRequestParameters(optionalParams),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...optionalParams.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...optionalParams.requestOptions?.headers },
       body: univariateUnivariateDetectionOptionsSerializer(options),
     });
 }
@@ -105,6 +88,7 @@ export async function _detectUnivariateLastPointDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = univariateAnomalyDetectorErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -118,34 +102,23 @@ export async function _detectUnivariateLastPointDeserialize(
 export async function detectUnivariateLastPoint(
   context: Client,
   options: UnivariateUnivariateDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateLastPointOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateLastPointOptionalParams = { requestOptions: {} },
 ): Promise<UnivariateUnivariateLastDetectionResult> {
-  const result = await _detectUnivariateLastPointSend(
-    context,
-    options,
-    optionalParams,
-  );
+  const result = await _detectUnivariateLastPointSend(context, options, optionalParams);
   return _detectUnivariateLastPointDeserialize(result);
 }
 
 export function _detectUnivariateEntireSeriesSend(
   context: Client,
   options: UnivariateUnivariateDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateEntireSeriesOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateEntireSeriesOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   return context
     .path("/timeseries/entire/detect")
     .post({
       ...operationOptionsToRequestParameters(optionalParams),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...optionalParams.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...optionalParams.requestOptions?.headers },
       body: univariateUnivariateDetectionOptionsSerializer(options),
     });
 }
@@ -157,6 +130,7 @@ export async function _detectUnivariateEntireSeriesDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = univariateAnomalyDetectorErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -172,14 +146,8 @@ export async function _detectUnivariateEntireSeriesDeserialize(
 export async function detectUnivariateEntireSeries(
   context: Client,
   options: UnivariateUnivariateDetectionOptions,
-  optionalParams: UnivariateDetectUnivariateEntireSeriesOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: UnivariateDetectUnivariateEntireSeriesOptionalParams = { requestOptions: {} },
 ): Promise<UnivariateUnivariateEntireDetectionResult> {
-  const result = await _detectUnivariateEntireSeriesSend(
-    context,
-    options,
-    optionalParams,
-  );
+  const result = await _detectUnivariateEntireSeriesSend(context, options, optionalParams);
   return _detectUnivariateEntireSeriesDeserialize(result);
 }

@@ -1,6 +1,7 @@
 import {
   SdkHttpParameter,
   SdkModelPropertyType,
+  SdkServiceResponseHeader,
   SdkType
 } from "@azure-tools/typespec-client-generator-core";
 import { getCredentialExpression } from "./get-credential-expression.js";
@@ -13,11 +14,12 @@ import { getNullableExpression } from "./get-nullable-expression.js";
 
 export interface EmitTypeOptions {
   emitInline?: boolean;
+  isOptional?: boolean;
 }
 
 export function normalizeModelPropertyName(
   context: SdkContext,
-  property: SdkModelPropertyType | SdkHttpParameter
+  property: SdkModelPropertyType | SdkHttpParameter | SdkServiceResponseHeader
 ): string {
   const normalizedPropName = normalizeName(property.name, NameType.Property);
   return context.rlcOptions?.ignorePropertyNameNormalize
@@ -62,7 +64,6 @@ export function getTypeExpression(
       }
       return "number";
     case "endpoint":
-    case "plainDate":
     case "plainTime":
     case "string":
     case "url":
@@ -103,6 +104,7 @@ export function getTypeExpression(
     case "union":
       return getUnionExpression(context, type, options);
     case "utcDateTime":
+    case "plainDate":
       return "Date";
 
     default:

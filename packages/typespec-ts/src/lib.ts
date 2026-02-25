@@ -15,6 +15,13 @@ import {
 import { Options } from "prettier";
 
 export interface EmitterOptions {
+  /**
+   * Indicates whether to include response headers in the generated response type for modular operations.
+   * When set to true, modular operation responses with model or void bodies will have their headers
+   * represented as properties on the response type. Other SDK styles and response shapes are not
+   * currently affected by this option.
+   */
+  "include-headers-in-response"?: boolean;
   "include-shortcuts"?: boolean;
   "multi-client"?: boolean;
   batch?: any[];
@@ -54,12 +61,13 @@ export interface EmitterOptions {
   "azure-arm"?: boolean;
   "source-from"?: "TypeSpec" | "Swagger";
   "is-modular-library"?: boolean;
-  "module-kind"?: "esm" | "cjs";
+  "module-kind"?: "esm";
   "enable-operation-group"?: boolean;
   flavor?: PackageFlavor;
   "enable-model-namespace"?: boolean;
   "hierarchy-client"?: boolean;
   "compatibility-mode"?: boolean;
+  "compatibility-lro"?: boolean;
   "experimental-extensible-enums"?: boolean;
   "clear-output-folder"?: boolean;
   "ignore-property-name-normalize"?: boolean;
@@ -71,12 +79,19 @@ export interface EmitterOptions {
   //TODO should remove this after finish the release tool test
   "should-use-pnpm-dep"?: boolean;
   "experimental-generate-test-files"?: boolean;
+  "ignore-nullable-on-optional"?: boolean;
 }
 
 export const RLCOptionsSchema: JSONSchemaType<EmitterOptions> = {
   type: "object",
   additionalProperties: true,
   properties: {
+    "include-headers-in-response": {
+      type: "boolean",
+      nullable: true,
+      description:
+        "This option is used to indicate whether to include response headers in the generated response type. When set to true, the generated response type will include response headers as properties."
+    },
     "include-shortcuts": {
       type: "boolean",
       nullable: true,
@@ -103,7 +118,8 @@ export const RLCOptionsSchema: JSONSchemaType<EmitterOptions> = {
         scopeName: { type: "string", nullable: true },
         nameWithoutScope: { type: "string", nullable: true },
         description: { type: "string", nullable: true },
-        version: { type: "string", nullable: true }
+        version: { type: "string", nullable: true },
+        isVersionUserProvided: { type: "boolean", nullable: true }
       },
       required: ["name"],
       nullable: true,
@@ -271,7 +287,7 @@ export const RLCOptionsSchema: JSONSchemaType<EmitterOptions> = {
     "module-kind": {
       type: "string",
       nullable: true,
-      enum: ["esm", "cjs"],
+      enum: ["esm"],
       default: "esm",
       description: "Internal option for test."
     },
@@ -280,6 +296,12 @@ export const RLCOptionsSchema: JSONSchemaType<EmitterOptions> = {
       nullable: true,
       description:
         "Whether to affect the generation of the additional property feature for the Modular client. Defaults to `false`."
+    },
+    "compatibility-lro": {
+      type: "boolean",
+      nullable: true,
+      description:
+        "[deprecated] Whether to generate the legacy LRO interface. When `true`, we will generate legacy beginXXX and beginXXXAndWait LRO methods."
     },
     "experimental-extensible-enums": {
       type: "boolean",
@@ -341,6 +363,12 @@ export const RLCOptionsSchema: JSONSchemaType<EmitterOptions> = {
       type: "boolean",
       nullable: true,
       description: "Whether to generate test files for the client."
+    },
+    "ignore-nullable-on-optional": {
+      type: "boolean",
+      nullable: true,
+      description:
+        "If an optional property is also marked as nullable, it will be treated as just optional. Defaults to `true` for Azure services."
     }
   },
   required: []
@@ -547,6 +575,12 @@ const libDef = {
         default: paramMessage`The parameter name ${"parameterName"} has conflicts with others and please use @clientName to rename it.`
       }
     },
+    "unsupported-flatten-transition": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`The property "${"propertyName"}" in "${"modelName"}" has multiple consecutive flatten operations. Flatten transitions are not supported so consecutive transitions will be ignored.`
+      }
+    },
     "unsupported-parameter-type": {
       severity: "error",
       messages: {
@@ -594,6 +628,18 @@ const libDef = {
       messages: {
         default: paramMessage`Error traversing directory ${"directory"}: ${"error"}`
       }
+    },
+    "detected-model-name-conflict": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`Model name conflict detected: "${"modelName"}" exists in multiple namespaces: ${"namespaces"}. Please use @clientName to rename them.`
+      }
+    },
+    "un-supported-array-encoding": {
+      severity: "warning",
+      messages: {
+        default: paramMessage`The array property "${"arrayName"}" of ${"arrayType"} type is not supported for encoding and will be ignored.`
+      }
     }
   },
   emitter: {
@@ -609,7 +655,7 @@ export const prettierTypeScriptOptions: Options = {
   arrowParens: "always",
   bracketSpacing: true,
   endOfLine: "lf",
-  printWidth: 80,
+  printWidth: 100,
   semi: true,
   singleQuote: false,
   tabWidth: 2

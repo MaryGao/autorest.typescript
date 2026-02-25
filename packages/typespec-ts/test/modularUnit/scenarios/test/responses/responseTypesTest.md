@@ -156,27 +156,18 @@ describe("show example demo", () => {
     assert.strictEqual(result.numberLiteral, 12);
     assert.strictEqual(result.plainDateProp, "2022-12-12");
     assert.strictEqual(result.plainTimeProp, "13:06:12");
-    assert.strictEqual(
-      result.utcDateTimeProp,
-      new Date("2022-08-26T18:38:00Z"),
-    );
+    assert.strictEqual(result.utcDateTimeProp, new Date("2022-08-26T18:38:00Z"));
     assert.strictEqual(result.offsetDateTimeProp, "2022-08-26T18:38:00Z");
     assert.strictEqual(result.durationProp, "P123DT22H14M12.011S");
     assert.strictEqual(result.withEscapeChars, '"Tag 10".Value');
     assert.equal(result.unknownRecord.a, "foo");
     assert.equal(
       result.certificate,
-      Buffer.from(
-        "TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V",
-        "base64",
-      ),
+      Buffer.from("TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V", "base64"),
     );
     assert.equal(
       result.profile,
-      Buffer.from(
-        "TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V",
-        "base64url",
-      ),
+      Buffer.from("TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V", "base64url"),
     );
   });
 });

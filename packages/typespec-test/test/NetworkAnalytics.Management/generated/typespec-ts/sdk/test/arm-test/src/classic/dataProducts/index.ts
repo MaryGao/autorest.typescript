@@ -3,6 +3,7 @@
 
 import { NetworkAnalyticsApiContext } from "../../api/networkAnalyticsApiContext.js";
 import {
+  read,
   listBySubscription,
   listByResourceGroup,
   listRolesAssignments,
@@ -16,6 +17,7 @@ import {
   create,
 } from "../../api/dataProducts/operations.js";
 import {
+  DataProductsReadOptionalParams,
   DataProductsListBySubscriptionOptionalParams,
   DataProductsListByResourceGroupOptionalParams,
   DataProductsListRolesAssignmentsOptionalParams,
@@ -37,12 +39,15 @@ import {
   RoleAssignmentCommonProperties,
   RoleAssignmentDetail,
   ListRoleAssignments,
+  Client,
 } from "../../models/models.js";
 import { PagedAsyncIterableIterator } from "../../static-helpers/pagingHelpers.js";
+import { SimplePollerLike, getSimplePoller } from "../../static-helpers/simplePollerHelpers.js";
 import { PollerLike, OperationState } from "@azure/core-lro";
 
 /** Interface representing a DataProducts operations. */
 export interface DataProductsOperations {
+  read: (body: Client, options?: DataProductsReadOptionalParams) => Promise<Client>;
   /** List data products by subscription. */
   listBySubscription: (
     options?: DataProductsListBySubscriptionOptionalParams,
@@ -98,6 +103,18 @@ export interface DataProductsOperations {
     dataProductName: string,
     options?: DataProductsDeleteOptionalParams,
   ) => PollerLike<OperationState<void>, void>;
+  /** @deprecated use delete instead */
+  beginDelete: (
+    resourceGroupName: string,
+    dataProductName: string,
+    options?: DataProductsDeleteOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<void>, void>>;
+  /** @deprecated use delete instead */
+  beginDeleteAndWait: (
+    resourceGroupName: string,
+    dataProductName: string,
+    options?: DataProductsDeleteOptionalParams,
+  ) => Promise<void>;
   /** Update data product resource. */
   update: (
     resourceGroupName: string,
@@ -105,6 +122,20 @@ export interface DataProductsOperations {
     properties: DataProductUpdate,
     options?: DataProductsUpdateOptionalParams,
   ) => PollerLike<OperationState<DataProduct>, DataProduct>;
+  /** @deprecated use update instead */
+  beginUpdate: (
+    resourceGroupName: string,
+    dataProductName: string,
+    properties: DataProductUpdate,
+    options?: DataProductsUpdateOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<DataProduct>, DataProduct>>;
+  /** @deprecated use update instead */
+  beginUpdateAndWait: (
+    resourceGroupName: string,
+    dataProductName: string,
+    properties: DataProductUpdate,
+    options?: DataProductsUpdateOptionalParams,
+  ) => Promise<DataProduct>;
   /** Retrieve data product resource. */
   get: (
     resourceGroupName: string,
@@ -118,13 +149,27 @@ export interface DataProductsOperations {
     resource: DataProduct,
     options?: DataProductsCreateOptionalParams,
   ) => PollerLike<OperationState<DataProduct>, DataProduct>;
+  /** @deprecated use create instead */
+  beginCreate: (
+    resourceGroupName: string,
+    dataProductName: string,
+    resource: DataProduct,
+    options?: DataProductsCreateOptionalParams,
+  ) => Promise<SimplePollerLike<OperationState<DataProduct>, DataProduct>>;
+  /** @deprecated use create instead */
+  beginCreateAndWait: (
+    resourceGroupName: string,
+    dataProductName: string,
+    resource: DataProduct,
+    options?: DataProductsCreateOptionalParams,
+  ) => Promise<DataProduct>;
 }
 
 function _getDataProducts(context: NetworkAnalyticsApiContext) {
   return {
-    listBySubscription: (
-      options?: DataProductsListBySubscriptionOptionalParams,
-    ) => listBySubscription(context, options),
+    read: (body: Client, options?: DataProductsReadOptionalParams) => read(context, body, options),
+    listBySubscription: (options?: DataProductsListBySubscriptionOptionalParams) =>
+      listBySubscription(context, options),
     listByResourceGroup: (
       resourceGroupName: string,
       options?: DataProductsListByResourceGroupOptionalParams,
@@ -134,34 +179,19 @@ function _getDataProducts(context: NetworkAnalyticsApiContext) {
       dataProductName: string,
       body: Record<string, any>,
       options?: DataProductsListRolesAssignmentsOptionalParams,
-    ) =>
-      listRolesAssignments(
-        context,
-        resourceGroupName,
-        dataProductName,
-        body,
-        options,
-      ),
+    ) => listRolesAssignments(context, resourceGroupName, dataProductName, body, options),
     removeUserRole: (
       resourceGroupName: string,
       dataProductName: string,
       body: RoleAssignmentDetail,
       options?: DataProductsRemoveUserRoleOptionalParams,
-    ) =>
-      removeUserRole(
-        context,
-        resourceGroupName,
-        dataProductName,
-        body,
-        options,
-      ),
+    ) => removeUserRole(context, resourceGroupName, dataProductName, body, options),
     addUserRole: (
       resourceGroupName: string,
       dataProductName: string,
       body: RoleAssignmentCommonProperties,
       options?: DataProductsAddUserRoleOptionalParams,
-    ) =>
-      addUserRole(context, resourceGroupName, dataProductName, body, options),
+    ) => addUserRole(context, resourceGroupName, dataProductName, body, options),
     rotateKey: (
       resourceGroupName: string,
       dataProductName: string,
@@ -173,26 +203,52 @@ function _getDataProducts(context: NetworkAnalyticsApiContext) {
       dataProductName: string,
       body: AccountSas,
       options?: DataProductsGenerateStorageAccountSasTokenOptionalParams,
-    ) =>
-      generateStorageAccountSasToken(
-        context,
-        resourceGroupName,
-        dataProductName,
-        body,
-        options,
-      ),
+    ) => generateStorageAccountSasToken(context, resourceGroupName, dataProductName, body, options),
     delete: (
       resourceGroupName: string,
       dataProductName: string,
       options?: DataProductsDeleteOptionalParams,
     ) => $delete(context, resourceGroupName, dataProductName, options),
+    beginDelete: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      options?: DataProductsDeleteOptionalParams,
+    ) => {
+      const poller = $delete(context, resourceGroupName, dataProductName, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginDeleteAndWait: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      options?: DataProductsDeleteOptionalParams,
+    ) => {
+      return await $delete(context, resourceGroupName, dataProductName, options);
+    },
     update: (
       resourceGroupName: string,
       dataProductName: string,
       properties: DataProductUpdate,
       options?: DataProductsUpdateOptionalParams,
-    ) =>
-      update(context, resourceGroupName, dataProductName, properties, options),
+    ) => update(context, resourceGroupName, dataProductName, properties, options),
+    beginUpdate: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      properties: DataProductUpdate,
+      options?: DataProductsUpdateOptionalParams,
+    ) => {
+      const poller = update(context, resourceGroupName, dataProductName, properties, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginUpdateAndWait: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      properties: DataProductUpdate,
+      options?: DataProductsUpdateOptionalParams,
+    ) => {
+      return await update(context, resourceGroupName, dataProductName, properties, options);
+    },
     get: (
       resourceGroupName: string,
       dataProductName: string,
@@ -204,6 +260,24 @@ function _getDataProducts(context: NetworkAnalyticsApiContext) {
       resource: DataProduct,
       options?: DataProductsCreateOptionalParams,
     ) => create(context, resourceGroupName, dataProductName, resource, options),
+    beginCreate: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      resource: DataProduct,
+      options?: DataProductsCreateOptionalParams,
+    ) => {
+      const poller = create(context, resourceGroupName, dataProductName, resource, options);
+      await poller.submitted();
+      return getSimplePoller(poller);
+    },
+    beginCreateAndWait: async (
+      resourceGroupName: string,
+      dataProductName: string,
+      resource: DataProduct,
+      options?: DataProductsCreateOptionalParams,
+    ) => {
+      return await create(context, resourceGroupName, dataProductName, resource, options);
+    },
   };
 }
 

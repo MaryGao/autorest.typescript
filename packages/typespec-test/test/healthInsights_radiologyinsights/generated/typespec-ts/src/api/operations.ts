@@ -28,7 +28,7 @@ export function _inferRadiologyInsightsSend(
   const path = expandUrlTemplate(
     "/radiology-insights/jobs{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2023-09-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -41,11 +41,11 @@ export function _inferRadiologyInsightsSend(
       contentType: "application/json",
       headers: {
         ...(options?.repeatabilityRequestId !== undefined
-          ? { "Repeatability-Request-ID": options?.repeatabilityRequestId }
+          ? { "repeatability-request-id": options?.repeatabilityRequestId }
           : {}),
         ...(options?.repeatabilityFirstSent !== undefined
           ? {
-              "Repeatability-First-Sent": !options?.repeatabilityFirstSent
+              "repeatability-first-sent": !options?.repeatabilityFirstSent
                 ? options?.repeatabilityFirstSent
                 : options?.repeatabilityFirstSent.toUTCString(),
             }
@@ -57,9 +57,7 @@ export function _inferRadiologyInsightsSend(
         patients: patientRecordArraySerializer(patients),
         configuration: !options?.configuration
           ? options?.configuration
-          : radiologyInsightsModelConfigurationSerializer(
-              options?.configuration,
-            ),
+          : radiologyInsightsModelConfigurationSerializer(options?.configuration),
       },
     });
 }
@@ -67,7 +65,7 @@ export function _inferRadiologyInsightsSend(
 export async function _inferRadiologyInsightsDeserialize(
   result: PathUncheckedResponse,
 ): Promise<RadiologyInsightsInferenceResult> {
-  const expectedStatuses = ["202", "200"];
+  const expectedStatuses = ["202", "200", "201"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
   }
@@ -87,21 +85,14 @@ export function inferRadiologyInsights(
   context: Client,
   patients: PatientRecord[],
   options: InferRadiologyInsightsOptionalParams = { requestOptions: {} },
-): PollerLike<
-  OperationState<RadiologyInsightsInferenceResult>,
-  RadiologyInsightsInferenceResult
-> {
-  return getLongRunningPoller(
-    context,
-    _inferRadiologyInsightsDeserialize,
-    ["202", "200"],
-    {
-      updateIntervalInMs: options?.updateIntervalInMs,
-      abortSignal: options?.abortSignal,
-      getInitialResponse: () =>
-        _inferRadiologyInsightsSend(context, patients, options),
-    },
-  ) as PollerLike<
+): PollerLike<OperationState<RadiologyInsightsInferenceResult>, RadiologyInsightsInferenceResult> {
+  return getLongRunningPoller(context, _inferRadiologyInsightsDeserialize, ["202", "200", "201"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () => _inferRadiologyInsightsSend(context, patients, options),
+
+    apiVersion: context.apiVersion ?? "2023-09-01-preview",
+  }) as PollerLike<
     OperationState<RadiologyInsightsInferenceResult>,
     RadiologyInsightsInferenceResult
   >;

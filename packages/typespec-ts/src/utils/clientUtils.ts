@@ -18,22 +18,65 @@ import { SdkContext } from "./interfaces.js";
 import { ModularClientOptions } from "../modular/interfaces.js";
 import { NameType, normalizeName } from "@azure-tools/rlc-common";
 
-export function getRLCClients(dpgContext: SdkContext): SdkClient[] {
-  const services = new Set<Namespace>();
-  listClients(dpgContext).forEach((c) => services.add(c.service));
-  const rawServiceNamespaces = listAllServiceNamespaces(dpgContext);
-  if (services.size === 0 && rawServiceNamespaces.length > 0) {
-    // If no clients are found, fall back to raw service namespaces
-    [...rawServiceNamespaces.values()].forEach((ns) => services.add(ns));
+export function getRLCClients(
+  dpgContext: SdkContext,
+  isModularLibrary?: boolean
+): SdkClient[] {
+  const modular =
+    isModularLibrary ?? dpgContext.rlcOptions?.isModularLibrary ?? false;
+  const clients = listClients(dpgContext);
+  const rawServiceNamespaces =
+    dpgContext.allServiceNamespaces ?? listAllServiceNamespaces(dpgContext);
+
+  // For one client in Modular: Return the client from listClients with multi-service support
+  if (modular && clients.length === 1) {
+    return clients.map((client) => {
+      const services = client.services;
+      return {
+        ...client,
+        services: services,
+        crossLanguageDefinitionId: `${getNamespaceFullName(
+          services[0]!
+        )}.${client.name}`
+      };
+    });
+  } else {
+    // For RLC and multiple clients in Modular:
+    // Flatten all services and return one client per service
+    const services = new Set<Namespace>();
+    clients.forEach((c) => {
+      const clientService = c.services;
+      clientService.forEach((ns) => services.add(ns));
+    });
+
+    if (services.size > 0) {
+      return [...services.values()].map((service) => {
+        const clientName = service.name + "Client";
+        return {
+          kind: "SdkClient",
+          name: clientName,
+          service: service,
+          type: service,
+          services: [service],
+          arm: Boolean(dpgContext.arm),
+          crossLanguageDefinitionId: `${getNamespaceFullName(
+            service
+          )}.${clientName}`,
+          subOperationGroups: []
+        };
+      });
+    }
   }
 
-  return [...services.values()].map((service) => {
+  // Fallback to raw service namespaces if no clients found
+  return rawServiceNamespaces.map((service) => {
     const clientName = service.name + "Client";
     return {
       kind: "SdkClient",
       name: clientName,
       service: service,
       type: service,
+      services: [service],
       arm: Boolean(dpgContext.arm),
       crossLanguageDefinitionId: `${getNamespaceFullName(
         service
@@ -45,7 +88,8 @@ export function getRLCClients(dpgContext: SdkContext): SdkClient[] {
 
 export function listOperationsUnderRLCClient(client: SdkClient): Operation[] {
   const operations = [];
-  const queue: (Namespace | Interface)[] = [client.service];
+  const serviceArray = client.services;
+  const queue: (Namespace | Interface)[] = [...serviceArray];
   while (queue.length > 0) {
     const current = queue.shift()!;
     if (
@@ -55,7 +99,7 @@ export function listOperationsUnderRLCClient(client: SdkClient): Operation[] {
           getNamespaceFullName(d.definition?.namespace) ===
             "Azure.ClientGenerator.Core"
       ) &&
-      current !== client.service
+      !serviceArray.includes(current as Namespace)
     ) {
       continue;
     }

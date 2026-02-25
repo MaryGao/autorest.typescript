@@ -29,6 +29,41 @@ describe("Multipart Client", () => {
     });
   });
 
+  it("multipart request with wire name", async () => {
+    await client.formData.withWireName({
+      identifier: "123",
+      image: {
+        contents: fs.createReadStream(imgPath),
+        filename: "test.jpg"
+      }
+    });
+  });
+
+  it("optional parts - id only", async () => {
+    await client.formData.optionalParts({
+      id: "123"
+    });
+  });
+
+  it("optional parts - profileImage only", async () => {
+    await client.formData.optionalParts({
+      profileImage: {
+        contents: fs.createReadStream(imgPath),
+        filename: "test.jpg"
+      }
+    });
+  });
+
+  it("optional parts - both id and profileImage", async () => {
+    await client.formData.optionalParts({
+      id: "123",
+      profileImage: {
+        contents: fs.createReadStream(imgPath),
+        filename: "test.jpg"
+      }
+    });
+  });
+
   // TODO not supported
   it.skip("anonymous model", async () => {
     // @ts-ignore - not supported yet
@@ -125,9 +160,7 @@ describe("Multipart Client", () => {
       });
     });
 
-    // TODO fix the serialization
-    it.skip("non-string (float value)", async () => {
-      // the generation is correct now, but the serialization is not
+    it("non-string (float value)", async () => {
       await client.formData.httpParts.nonString.float({ temperature: 0.5 });
     });
 
@@ -165,6 +198,41 @@ describe("Multipart Client", () => {
             contentType: "application/octet-stream"
           }
         });
+      });
+    });
+  });
+
+  describe("File operations", () => {
+    it("upload file with specific content type", async () => {
+      await client.formData.file.uploadFileSpecificContentType({
+        file: {
+          contents: fs.createReadStream(pngPath),
+          filename: "image.png"
+        }
+      });
+    });
+
+    it("upload file with required filename", async () => {
+      await client.formData.file.uploadFileRequiredFilename({
+        file: {
+          contents: fs.createReadStream(pngPath),
+          filename: "image.png"
+        }
+      });
+    });
+
+    it("upload file array", async () => {
+      await client.formData.file.uploadFileArray({
+        files: [
+          {
+            contents: fs.createReadStream(pngPath),
+            filename: "image1.png"
+          },
+          {
+            contents: fs.createReadStream(pngPath),
+            filename: "image2.png"
+          }
+        ]
       });
     });
   });

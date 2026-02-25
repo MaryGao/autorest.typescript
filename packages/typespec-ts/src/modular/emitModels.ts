@@ -35,13 +35,27 @@ import {
 } from "@azure-tools/typespec-client-generator-core";
 import {
   getExternalModel,
-  getModelExpression
+  getModelExpression,
+  getMultipartFileTypeExpression
 } from "./type-expressions/get-model-expression.js";
 
 import { SdkContext } from "../utils/interfaces.js";
 import { addDeclaration } from "../framework/declaration.js";
-import { buildModelDeserializer } from "./serialization/buildDeserializerFunction.js";
-import { buildModelSerializer } from "./serialization/buildSerializerFunction.js";
+import {
+  buildModelDeserializer,
+  buildPropertyDeserializer
+} from "./serialization/buildDeserializerFunction.js";
+import {
+  buildModelSerializer,
+  buildPropertySerializer
+} from "./serialization/buildSerializerFunction.js";
+import {
+  buildXmlModelSerializer,
+  buildXmlModelDeserializer,
+  buildXmlObjectModelSerializer,
+  buildXmlObjectModelDeserializer,
+  hasXmlSerialization
+} from "./serialization/buildXmlSerializerFunction.js";
 import path from "path";
 import { refkey } from "../framework/refkey.js";
 import { useContext } from "../contextManager.js";
@@ -50,6 +64,7 @@ import { isAzureCoreErrorType } from "../utils/modelUtils.js";
 import { isExtensibleEnum } from "./type-expressions/get-enum-expression.js";
 import {
   getAllDiscriminatedValues,
+  getPropertyWithOverrides,
   isDiscriminatedUnion
 } from "./serialization/serializeUtils.js";
 import { reportDiagnostic } from "../lib.js";
@@ -60,10 +75,9 @@ import {
 } from "./type-expressions/get-type-expression.js";
 import {
   emitQueue,
+  flattenPropertyModelMap,
   getAllOperationsFromClient
 } from "../framework/hooks/sdkTypes.js";
-import { resolveReference } from "../framework/reference.js";
-import { MultipartHelpers } from "./static-helpers-metadata.js";
 import { getAllAncestors } from "./helpers/operationHelpers.js";
 import { getAllProperties } from "./helpers/operationHelpers.js";
 import { getDirectSubtypes } from "./helpers/typeHelpers.js";
@@ -112,8 +126,22 @@ export function emitTypes(
     sourceFile = outputProject.getSourceFile(filepath);
     if (!sourceFile) {
       sourceFile = outputProject.createSourceFile(filepath);
+      sourceFile.addStatements(`/**
+* This file contains only generated model types and their (de)serializers.
+* Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+*/
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */`);
     }
     emitType(context, type, sourceFile);
+  }
+
+  // Emit serialization/deserialization functions for flattened properties
+  for (const [property, _] of flattenPropertyModelMap) {
+    const namespaces = getModelNamespaces(context, property.type);
+    const filepath = getModelsPath(sourceRoot, namespaces);
+    sourceFile = outputProject.getSourceFile(filepath);
+    addSerializationFunctions(context, property, sourceFile!);
   }
 
   const modelFiles = outputProject.getSourceFiles(
@@ -189,6 +217,10 @@ function emitType(context: SdkContext, type: SdkType, sourceFile: SourceFile) {
       return;
     }
     const apiVersionEnumOnly = type.usage === UsageFlags.ApiVersionEnum;
+    // Skip known api version enums for multi-service scenarios as users are not allowed to set api versions
+    if (apiVersionEnumOnly && context.rlcOptions?.isMultiService) {
+      return;
+    }
     const inputUsage = (type.usage & UsageFlags.Input) === UsageFlags.Input;
     const outputUsage = (type.usage & UsageFlags.Output) === UsageFlags.Output;
     const exceptionUsage =
@@ -239,6 +271,10 @@ function emitType(context: SdkContext, type: SdkType, sourceFile: SourceFile) {
 }
 
 export function getApiVersionEnum(context: SdkContext) {
+  // Skip api version enum for multi-service scenarios since each service may have different versions
+  if (context.rlcOptions?.isMultiService) {
+    return;
+  }
   const apiVersionEnum = context.sdkPackage.enums.find(
     (e) => e.usage === UsageFlags.ApiVersionEnum
   );
@@ -266,9 +302,6 @@ export function getModelNamespaces(
   context: SdkContext,
   model: SdkType
 ): string[] {
-  const deepestNamespace = getNamespaceFullName(
-    listAllServiceNamespaces(context)[0]!
-  );
   if (
     model.kind === "model" ||
     model.kind === "enum" ||
@@ -285,6 +318,14 @@ export function getModelNamespaces(
       return [];
     }
     const segments = model.namespace.split(".");
+    // Keep full namespace segments if multiple services are present because there isn't a root namespace to trim
+    if (context.rlcOptions?.isMultiService) {
+      return segments;
+    }
+
+    const allServiceNamespaces =
+      context.allServiceNamespaces ?? listAllServiceNamespaces(context);
+    const deepestNamespace = getNamespaceFullName(allServiceNamespaces[0]!);
     const rootNamespace = deepestNamespace.split(".") ?? [];
     if (segments.length > rootNamespace.length) {
       while (segments[0] === rootNamespace[0]) {
@@ -304,36 +345,120 @@ export function getModelNamespaces(
 
 function addSerializationFunctions(
   context: SdkContext,
-  type: SdkType,
+  typeOrProperty: SdkType | SdkModelPropertyType,
   sourceFile: SourceFile,
-  skipDiscriminatedUnion = false
+  skipDiscriminatedUnionSuffix = false
 ) {
-  const serializationFunction = buildModelSerializer(
-    context,
-    type,
-    skipDiscriminatedUnion
-  );
+  const options = {
+    nameOnly: false,
+    skipDiscriminatedUnionSuffix
+  };
 
-  const serializerRefkey = refkey(type, "serializer");
-  const deserailizerRefKey = refkey(type, "deserializer");
+  // Add JSON serializers
+  const serializationFunction =
+    typeOrProperty.kind === "property"
+      ? buildPropertySerializer(context, typeOrProperty, options)
+      : buildModelSerializer(context, typeOrProperty, options);
+
+  const serializerRefKey = refkey(typeOrProperty, "serializer");
+  const deserializerRefKey = refkey(typeOrProperty, "deserializer");
   if (
     serializationFunction &&
     typeof serializationFunction !== "string" &&
     serializationFunction.name
   ) {
-    addDeclaration(sourceFile, serializationFunction, serializerRefkey);
+    addDeclaration(sourceFile, serializationFunction, serializerRefKey);
   }
-  const deserializationFunction = buildModelDeserializer(
-    context,
-    type,
-    skipDiscriminatedUnion
-  );
+  const deserializationFunction =
+    typeOrProperty.kind === "property"
+      ? buildPropertyDeserializer(context, typeOrProperty, options)
+      : buildModelDeserializer(context, typeOrProperty, options);
   if (
     deserializationFunction &&
     typeof deserializationFunction !== "string" &&
     deserializationFunction.name
   ) {
-    addDeclaration(sourceFile, deserializationFunction, deserailizerRefKey);
+    addDeclaration(sourceFile, deserializationFunction, deserializerRefKey);
+  }
+
+  // Add XML serializers if the type has XML serialization options
+  if (typeOrProperty.kind === "model" && hasXmlSerialization(typeOrProperty)) {
+    const xmlSerializerRefKey = refkey(typeOrProperty, "xmlSerializer");
+    const xmlDeserializerRefKey = refkey(typeOrProperty, "xmlDeserializer");
+    const xmlObjectSerializerRefKey = refkey(
+      typeOrProperty,
+      "xmlObjectSerializer"
+    );
+    const xmlObjectDeserializerRefKey = refkey(
+      typeOrProperty,
+      "xmlObjectDeserializer"
+    );
+
+    const xmlSerializationFunction = buildXmlModelSerializer(
+      context,
+      typeOrProperty,
+      options
+    );
+    if (
+      xmlSerializationFunction &&
+      typeof xmlSerializationFunction !== "string" &&
+      xmlSerializationFunction.name
+    ) {
+      addDeclaration(sourceFile, xmlSerializationFunction, xmlSerializerRefKey);
+    }
+
+    // Also generate XML object serializer for nested object serialization
+    const xmlObjectSerializationFunction = buildXmlObjectModelSerializer(
+      context,
+      typeOrProperty,
+      options
+    );
+    if (
+      xmlObjectSerializationFunction &&
+      typeof xmlObjectSerializationFunction !== "string" &&
+      xmlObjectSerializationFunction.name
+    ) {
+      addDeclaration(
+        sourceFile,
+        xmlObjectSerializationFunction,
+        xmlObjectSerializerRefKey
+      );
+    }
+
+    const xmlDeserializationFunction = buildXmlModelDeserializer(
+      context,
+      typeOrProperty,
+      options
+    );
+    if (
+      xmlDeserializationFunction &&
+      typeof xmlDeserializationFunction !== "string" &&
+      xmlDeserializationFunction.name
+    ) {
+      addDeclaration(
+        sourceFile,
+        xmlDeserializationFunction,
+        xmlDeserializerRefKey
+      );
+    }
+
+    // Also generate XML object deserializer for nested object deserialization
+    const xmlObjectDeserializationFunction = buildXmlObjectModelDeserializer(
+      context,
+      typeOrProperty,
+      options
+    );
+    if (
+      xmlObjectDeserializationFunction &&
+      typeof xmlObjectDeserializationFunction !== "string" &&
+      xmlObjectDeserializationFunction.name
+    ) {
+      addDeclaration(
+        sourceFile,
+        xmlObjectDeserializationFunction,
+        xmlObjectDeserializerRefKey
+      );
+    }
   }
 }
 
@@ -468,16 +593,44 @@ function buildModelInterface(
   context: SdkContext,
   type: SdkModelType
 ): InterfaceDeclarationStructure {
+  const flattenPropertySet = new Set<SdkModelPropertyType>();
   const interfaceStructure = {
     kind: StructureKind.Interface,
     name: normalizeModelName(context, type, NameType.Interface, true),
     isExported: true,
     properties: type.properties
       .filter((p) => !isMetadata(context.program, p.__raw!))
+      .filter((p) => {
+        // filter out the flatten property to be processed later
+        if (p.flatten && p.type.kind === "model") {
+          flattenPropertySet.add(p);
+          return false;
+        }
+        return true;
+      })
       .map((p) => {
         return buildModelProperty(context, p, type);
       })
   } as InterfaceStructure;
+  for (const flatten of flattenPropertySet.keys()) {
+    const conflictMap =
+      useContext("sdkTypes").flattenProperties.get(flatten)?.conflictMap;
+    const allProperties = getAllProperties(
+      context,
+      flatten.type,
+      getAllAncestors(flatten.type)
+    ).filter((p) => !isMetadata(context.program, p.__raw!));
+    interfaceStructure.properties!.push(
+      ...allProperties.map((p) => {
+        // when the flattened property is optional, all its child properties should be optional too
+        const property = getPropertyWithOverrides(p, {
+          allOptional: flatten.optional,
+          propertyRenames: conflictMap
+        });
+        return buildModelProperty(context, property, type);
+      })
+    );
+  }
 
   if (type.baseModel) {
     const parentReference = getModelExpression(context, type.baseModel, {
@@ -618,7 +771,7 @@ export function normalizeModelName(
     : "";
   const internalModelPrefix =
     isPagedResultModel(context, type) || type.isGeneratedName ? "_" : "";
-  return `${internalModelPrefix}${normalizeName(namespacePrefix + type.name + unionSuffix, nameType, true)}`;
+  return `${internalModelPrefix}${normalizeName(namespacePrefix + type.name, nameType, true)}${unionSuffix}`;
 }
 
 function buildModelPolymorphicType(context: SdkContext, type: SdkModelType) {
@@ -629,7 +782,7 @@ function buildModelPolymorphicType(context: SdkContext, type: SdkModelType) {
   }
   const typeDeclaration: TypeAliasDeclarationStructure = {
     kind: StructureKind.TypeAlias,
-    name: `${normalizeName(type.name, NameType.Interface)}Union`,
+    name: `${normalizeModelName(context, type, NameType.Interface, true)}Union`,
     isExported: true,
     type: directSubtypes
       .filter((p) => {
@@ -682,45 +835,15 @@ function buildModelProperty(
       .join(" | ");
   }
   // eslint-disable-next-line
-  else if (property.kind === "property" && property.isMultipartFileInput) {
-    // eslint-disable-next-line
-    const multipartOptions = property.multipartOptions;
-    typeExpression = "{";
-    typeExpression += `contents: ${resolveReference(MultipartHelpers.FileContents)};`;
-
-    const isContentTypeOptional =
-      multipartOptions?.contentType === undefined ||
-      multipartOptions.contentType.optional ||
-      multipartOptions.defaultContentTypes.length > 0;
-    const isFilenameOptional =
-      multipartOptions?.filename === undefined ||
-      multipartOptions.filename.optional;
-
-    const contentTypeType = multipartOptions?.contentType
-      ? getTypeExpression(context, multipartOptions.contentType.type)
-      : "string";
-    const filenameType = multipartOptions?.filename
-      ? getTypeExpression(context, multipartOptions.filename.type)
-      : "string";
-
-    typeExpression += `contentType${isContentTypeOptional ? "?" : ""}: ${contentTypeType};`;
-    typeExpression += `filename${isFilenameOptional ? "?" : ""}: ${filenameType};`;
-
-    typeExpression += "}";
-
-    if (isContentTypeOptional && isFilenameOptional) {
-      // Allow passing content directly if both filename and content type are optional
-      typeExpression = `(${resolveReference(MultipartHelpers.FileContents)}) | ${typeExpression}`;
-    } else {
-      // If either one is required, still accept File at the top level since it requires a filename
-      typeExpression = `File | ${typeExpression}`;
-    }
-
-    if (property.type.kind === "array") {
-      typeExpression = `Array<${typeExpression}>`;
-    }
+  else if (
+    property.kind === "property" &&
+    property.serializationOptions.multipart?.isFilePart
+  ) {
+    typeExpression = getMultipartFileTypeExpression(context, property);
   } else {
-    typeExpression = getTypeExpression(context, property.type);
+    typeExpression = getTypeExpression(context, property.type, {
+      isOptional: property.optional
+    });
   }
 
   const propertyStructure: PropertySignatureStructure = {
@@ -741,6 +864,7 @@ function buildModelProperty(
 export function visitPackageTypes(context: SdkContext) {
   const { sdkPackage } = context;
   emitQueue.clear();
+  flattenPropertyModelMap.clear();
   // Add all models in the package to the emit queue
   for (const model of sdkPackage.models) {
     visitType(context, model);
@@ -845,6 +969,9 @@ function visitType(context: SdkContext, type: SdkType | undefined) {
     for (const property of type.properties) {
       if (!emitQueue.has(property.type)) {
         visitType(context, property.type);
+      }
+      if (property.flatten && property.type.kind === "model") {
+        flattenPropertyModelMap.set(property, type);
       }
     }
     if (type.discriminatedSubtypes) {

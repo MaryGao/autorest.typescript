@@ -70,7 +70,7 @@ export function _listTextBlocklistItemsSend(
     "/text/blocklists/{blocklistName}/blocklistItems{?api%2Dversion,top,skip,maxpagesize}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
       top: options?.top,
       skip: options?.skip,
       maxpagesize: options?.maxpagesize,
@@ -83,10 +83,7 @@ export function _listTextBlocklistItemsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -112,7 +109,7 @@ export function listTextBlocklistItems(
     () => _listTextBlocklistItemsSend(context, blocklistName, options),
     _listTextBlocklistItemsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2024-09-01" },
   );
 }
 
@@ -127,7 +124,7 @@ export function _getTextBlocklistItemSend(
     {
       blocklistName: blocklistName,
       blocklistItemId: blocklistItemId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -137,10 +134,7 @@ export function _getTextBlocklistItemSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -162,12 +156,7 @@ export async function getTextBlocklistItem(
   blocklistItemId: string,
   options: GetTextBlocklistItemOptionalParams = { requestOptions: {} },
 ): Promise<TextBlocklistItem> {
-  const result = await _getTextBlocklistItemSend(
-    context,
-    blocklistName,
-    blocklistItemId,
-    options,
-  );
+  const result = await _getTextBlocklistItemSend(context, blocklistName, blocklistItemId, options);
   return _getTextBlocklistItemDeserialize(result);
 }
 
@@ -181,7 +170,7 @@ export function _removeBlocklistItemsSend(
     "/text/blocklists/{blocklistName}:removeBlocklistItems{?api%2Dversion}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -214,12 +203,7 @@ export async function removeBlocklistItems(
   body: RemoveTextBlocklistItemsOptions,
   options: RemoveBlocklistItemsOptionalParams = { requestOptions: {} },
 ): Promise<void> {
-  const result = await _removeBlocklistItemsSend(
-    context,
-    blocklistName,
-    body,
-    options,
-  );
+  const result = await _removeBlocklistItemsSend(context, blocklistName, body, options);
   return _removeBlocklistItemsDeserialize(result);
 }
 
@@ -233,7 +217,7 @@ export function _addOrUpdateBlocklistItemsSend(
     "/text/blocklists/{blocklistName}:addOrUpdateBlocklistItems{?api%2Dversion}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -244,10 +228,7 @@ export function _addOrUpdateBlocklistItemsSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: addOrUpdateTextBlocklistItemsOptionsSerializer(body),
     });
 }
@@ -270,12 +251,7 @@ export async function addOrUpdateBlocklistItems(
   body: AddOrUpdateTextBlocklistItemsOptions,
   options: AddOrUpdateBlocklistItemsOptionalParams = { requestOptions: {} },
 ): Promise<AddOrUpdateTextBlocklistItemsResult> {
-  const result = await _addOrUpdateBlocklistItemsSend(
-    context,
-    blocklistName,
-    body,
-    options,
-  );
+  const result = await _addOrUpdateBlocklistItemsSend(context, blocklistName, body, options);
   return _addOrUpdateBlocklistItemsDeserialize(result);
 }
 
@@ -286,7 +262,7 @@ export function _listTextBlocklistsSend(
   const path = expandUrlTemplate(
     "/text/blocklists{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -296,10 +272,7 @@ export function _listTextBlocklistsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -324,7 +297,7 @@ export function listTextBlocklists(
     () => _listTextBlocklistsSend(context, options),
     _listTextBlocklistsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    { itemName: "value", nextLinkName: "nextLink", apiVersion: context.apiVersion ?? "2024-09-01" },
   );
 }
 
@@ -337,15 +310,13 @@ export function _deleteTextBlocklistSend(
     "/text/blocklists/{blocklistName}{?api%2Dversion}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
 export async function _deleteTextBlocklistDeserialize(
@@ -365,11 +336,7 @@ export async function deleteTextBlocklist(
   blocklistName: string,
   options: DeleteTextBlocklistOptionalParams = { requestOptions: {} },
 ): Promise<void> {
-  const result = await _deleteTextBlocklistSend(
-    context,
-    blocklistName,
-    options,
-  );
+  const result = await _deleteTextBlocklistSend(context, blocklistName, options);
   return _deleteTextBlocklistDeserialize(result);
 }
 
@@ -383,7 +350,7 @@ export function _createOrUpdateTextBlocklistSend(
     "/text/blocklists/{blocklistName}{?api%2Dversion}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -394,10 +361,7 @@ export function _createOrUpdateTextBlocklistSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: textBlocklistSerializer(resource),
     });
 }
@@ -420,12 +384,7 @@ export async function createOrUpdateTextBlocklist(
   resource: TextBlocklist,
   options: CreateOrUpdateTextBlocklistOptionalParams = { requestOptions: {} },
 ): Promise<TextBlocklist> {
-  const result = await _createOrUpdateTextBlocklistSend(
-    context,
-    blocklistName,
-    resource,
-    options,
-  );
+  const result = await _createOrUpdateTextBlocklistSend(context, blocklistName, resource, options);
   return _createOrUpdateTextBlocklistDeserialize(result);
 }
 
@@ -438,7 +397,7 @@ export function _getTextBlocklistSend(
     "/text/blocklists/{blocklistName}{?api%2Dversion}",
     {
       blocklistName: blocklistName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -448,10 +407,7 @@ export function _getTextBlocklistSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -484,7 +440,7 @@ export function _analyzeImageSend(
   const path = expandUrlTemplate(
     "/image:analyze{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -495,10 +451,7 @@ export function _analyzeImageSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: analyzeImageOptionsSerializer(body),
     });
 }
@@ -532,7 +485,7 @@ export function _detectTextProtectedMaterialSend(
   const path = expandUrlTemplate(
     "/text:detectProtectedMaterial{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -543,10 +496,7 @@ export function _detectTextProtectedMaterialSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: detectTextProtectedMaterialOptionsSerializer(body),
     });
 }
@@ -580,7 +530,7 @@ export function _shieldPromptSend(
   const path = expandUrlTemplate(
     "/text:shieldPrompt{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -591,10 +541,7 @@ export function _shieldPromptSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: shieldPromptOptionsSerializer(body),
     });
 }
@@ -628,7 +575,7 @@ export function _analyzeTextSend(
   const path = expandUrlTemplate(
     "/text:analyze{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-09-01",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -639,10 +586,7 @@ export function _analyzeTextSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: analyzeTextOptionsSerializer(body),
     });
 }

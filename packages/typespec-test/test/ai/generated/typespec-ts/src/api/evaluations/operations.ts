@@ -45,20 +45,16 @@ export function _disableScheduleSend(
     "/evaluations/schedules/{name}/disable{?apiVersion}",
     {
       name: name,
-      apiVersion: context.apiVersion,
+      apiVersion: context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .patch({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).patch({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _disableScheduleDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _disableScheduleDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -84,7 +80,7 @@ export function _listScheduleSend(
   const path = expandUrlTemplate(
     "/evaluations/schedules{?api%2Dversion,top,skip,maxpagesize}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
       top: options?.top,
       skip: options?.skip,
       maxpagesize: options?.maxpagesize,
@@ -128,7 +124,11 @@ export function listSchedule(
     () => _listScheduleSend(context, options),
     _listScheduleDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-07-01-preview",
+    },
   );
 }
 
@@ -136,15 +136,13 @@ export function _createOrReplaceScheduleSend(
   context: Client,
   name: string,
   resource: EvaluationSchedule,
-  options: EvaluationsCreateOrReplaceScheduleOptionalParams = {
-    requestOptions: {},
-  },
+  options: EvaluationsCreateOrReplaceScheduleOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/evaluations/schedules/{name}{?api%2Dversion}",
     {
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -182,16 +180,9 @@ export async function createOrReplaceSchedule(
   context: Client,
   name: string,
   resource: EvaluationSchedule,
-  options: EvaluationsCreateOrReplaceScheduleOptionalParams = {
-    requestOptions: {},
-  },
+  options: EvaluationsCreateOrReplaceScheduleOptionalParams = { requestOptions: {} },
 ): Promise<EvaluationSchedule> {
-  const result = await _createOrReplaceScheduleSend(
-    context,
-    name,
-    resource,
-    options,
-  );
+  const result = await _createOrReplaceScheduleSend(context, name, resource, options);
   return _createOrReplaceScheduleDeserialize(result);
 }
 
@@ -204,7 +195,7 @@ export function _getScheduleSend(
     "/evaluations/schedules/{name}{?api%2Dversion}",
     {
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -255,7 +246,7 @@ export function _updateSend(
     "/evaluations/runs/{id}{?api%2Dversion}",
     {
       id: id,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -277,9 +268,7 @@ export function _updateSend(
     });
 }
 
-export async function _updateDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Evaluation> {
+export async function _updateDeserialize(result: PathUncheckedResponse): Promise<Evaluation> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -306,7 +295,7 @@ export function _listSend(
   const path = expandUrlTemplate(
     "/evaluations/runs{?api%2Dversion,top,skip,maxpagesize}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
       top: options?.top,
       skip: options?.skip,
       maxpagesize: options?.maxpagesize,
@@ -329,9 +318,7 @@ export function _listSend(
     });
 }
 
-export async function _listDeserialize(
-  result: PathUncheckedResponse,
-): Promise<_PagedEvaluation> {
+export async function _listDeserialize(result: PathUncheckedResponse): Promise<_PagedEvaluation> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -350,7 +337,11 @@ export function list(
     () => _listSend(context, options),
     _listDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-07-01-preview",
+    },
   );
 }
 
@@ -362,7 +353,7 @@ export function _createSend(
   const path = expandUrlTemplate(
     "/evaluations/runs:run{?apiVersion}",
     {
-      apiVersion: context.apiVersion,
+      apiVersion: context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -373,17 +364,12 @@ export function _createSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: evaluationSerializer(evaluation),
     });
 }
 
-export async function _createDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Evaluation> {
+export async function _createDeserialize(result: PathUncheckedResponse): Promise<Evaluation> {
   const expectedStatuses = ["201"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -411,7 +397,7 @@ export function _getSend(
     "/evaluations/runs/{id}{?api%2Dversion}",
     {
       id: id,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -431,9 +417,7 @@ export function _getSend(
     });
 }
 
-export async function _getDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Evaluation> {
+export async function _getDeserialize(result: PathUncheckedResponse): Promise<Evaluation> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);

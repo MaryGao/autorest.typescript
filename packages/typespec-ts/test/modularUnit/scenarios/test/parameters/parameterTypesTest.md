@@ -136,10 +136,7 @@ describe("show example demo", () => {
       unknownValueWithNum: 7,
       unknownValueWithNull: null,
       unknownValueWithBoolean: false,
-      unknownValueWithObjectNested: {
-        foo: "bar",
-        bar: [{ foo: "fooStr" }, "barStr", 7],
-      },
+      unknownValueWithObjectNested: { foo: "bar", bar: [{ foo: "fooStr" }, "barStr", 7] },
       strValue: "00000000-0000-0000-0000-00000000000",
       numValue: 0.12,
       enumValue: "red",
@@ -159,14 +156,8 @@ describe("show example demo", () => {
       durationProp: "P123DT22H14M12.011S",
       withEscapeChars: '"Tag 10".Value',
       unknownRecord: { a: "foo" },
-      certificate: Buffer.from(
-        "TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V",
-        "base64",
-      ),
-      profile: Buffer.from(
-        "TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V",
-        "base64url",
-      ),
+      certificate: Buffer.from("TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V", "base64"),
+      profile: Buffer.from("TUlJRE5EQ0NBaHlnQXdJQkFnSVFDYUxFKzVTSlNVeWdncDM0V", "base64url"),
       additionalProperties: {
         additionalProp: "additional prop",
       },

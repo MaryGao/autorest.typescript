@@ -215,7 +215,8 @@ export function serializeExampleValue(value: SdkExampleValue): string {
       break;
     case "dict":
     case "model": {
-      const mapper = buildPropertyNameMapper(value.type);
+      const dpgContext = useContext("emitContext").tcgcContext;
+      const mapper = buildPropertyNameMapper(dpgContext, value.type);
       const values = [];
       const additionalPropertiesValue =
         value.kind === "model" ? (value.additionalPropertiesValue ?? {}) : {};

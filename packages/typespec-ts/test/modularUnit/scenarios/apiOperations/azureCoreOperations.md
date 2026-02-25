@@ -87,10 +87,7 @@ export function _getWidgetOperationStatusSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -102,9 +99,7 @@ export async function _getWidgetOperationStatusDeserialize(
     throw createRestError(result);
   }
 
-  return resourceOperationStatusWidgetSuiteWidgetSuiteErrorDeserializer(
-    result.body,
-  );
+  return resourceOperationStatusWidgetSuiteWidgetSuiteErrorDeserializer(result.body);
 }
 
 /** Get the status of a long-running operation on widgets. */
@@ -131,6 +126,12 @@ Generate the models
 ```ts models
 import { ErrorModel } from "@azure-rest/core-client";
 
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** Provides status details for long running operations. */
 export interface ResourceOperationStatusWidgetSuiteWidgetSuiteError {
   /** The unique ID of the operation. */
@@ -150,19 +151,12 @@ export function resourceOperationStatusWidgetSuiteWidgetSuiteErrorDeserializer(
     id: item["id"],
     status: item["status"],
     error: !item["error"] ? item["error"] : item["error"],
-    result: !item["result"]
-      ? item["result"]
-      : widgetSuiteDeserializer(item["result"]),
+    result: !item["result"] ? item["result"] : widgetSuiteDeserializer(item["result"]),
   };
 }
 
 /** Enum describing allowed operation states. */
-export type OperationState =
-  | "NotStarted"
-  | "Running"
-  | "Succeeded"
-  | "Failed"
-  | "Canceled";
+export type OperationState = "NotStarted" | "Running" | "Succeeded" | "Failed" | "Canceled";
 
 /** A widget. */
 export interface WidgetSuite {

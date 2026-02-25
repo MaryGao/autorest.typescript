@@ -40,6 +40,28 @@ type SdkParameter =
   | SdkCredentialParameter
   | SdkHttpParameter;
 
+export function hasDefaultValue(p: SdkParameter) {
+  if (
+    p.clientDefaultValue ||
+    p.__raw?.defaultValue ||
+    p.type.kind === "constant"
+  ) {
+    return true;
+  }
+
+  // Special case for endpoint parameters with template arguments that have default values
+  if (p.type.kind === "endpoint" && p.type.templateArguments[0]) {
+    const templateArg = p.type.templateArguments[0];
+    return !!(
+      templateArg.clientDefaultValue ||
+      templateArg.__raw?.defaultValue ||
+      templateArg.type?.kind === "constant"
+    );
+  }
+
+  return false;
+}
+
 export function getClientParameters(
   client: SdkClientType<SdkServiceOperation>,
   dpgContext: SdkContext,
@@ -70,22 +92,22 @@ export function getClientParameters(
     }
   }
 
-  const hasDefaultValue = (p: SdkParameter) =>
-    p.clientDefaultValue || p.__raw?.defaultValue || p.type.kind === "constant";
   const isRequired = (p: SdkParameter) =>
-    !p.optional &&
-    ((!hasDefaultValue(p) &&
-      !(
-        p.type.kind === "endpoint" &&
-        p.type.templateArguments[0] &&
-        hasDefaultValue(p.type.templateArguments[0])
-      )) ||
-      (options.apiVersionAsRequired && p.isApiVersionParam));
-  const isOptional = (p: SdkParameter) => p.optional || hasDefaultValue(p);
+    // Special case: when apiVersionAsRequired is true, apiVersion should always be considered required
+    (options.apiVersionAsRequired && p.isApiVersionParam) ||
+    (!p.optional && !hasDefaultValue(p));
+  const isOptional = (p: SdkParameter) =>
+    p.optional ||
+    p.clientDefaultValue ||
+    p.__raw?.defaultValue ||
+    p.type.kind === "constant";
   const skipCredentials = (p: SdkParameter) => p.kind !== "credential";
   const skipMethodParam = (p: SdkParameter) => p.kind !== "method";
   const armSpecific = (p: SdkParameter) =>
     !(p.kind === "endpoint" && dpgContext.arm);
+  // Skip apiVersion parameter when it's multi-service (each service has its own default apiVersion)
+  const skipApiVersionOnMultiService = (p: SdkParameter) =>
+    !(dpgContext.rlcOptions?.isMultiService && p.isApiVersionParam);
   const filters = [
     options.requiredOnly ? isRequired : undefined,
     dpgContext.rlcOptions?.addCredentials === false
@@ -93,12 +115,12 @@ export function getClientParameters(
       : undefined,
     options.optionalOnly ? isOptional : undefined,
     options.onClientOnly ? skipMethodParam : undefined,
-    options.skipArmSpecific ? undefined : armSpecific
+    options.skipArmSpecific ? undefined : armSpecific,
+    skipApiVersionOnMultiService
   ];
   const params = clientParams.filter((p) =>
     filters.every((filter) => !filter || filter(p))
   );
-
   return params;
 }
 
@@ -174,7 +196,8 @@ export function buildGetClientEndpointParam(
   context: StatementedNode,
   dpgContext: SdkContext,
   client: SdkClientType<SdkServiceOperation>
-): string {
+): { endpointParamName: string; assignedOptionalParams?: Set<string> } {
+  const assignedOptionalParams = new Set<string>();
   let coreEndpointParam = "";
   if (dpgContext.rlcOptions?.flavor === "azure") {
     const cloudSettingSuffix = dpgContext.arm
@@ -209,8 +232,10 @@ export function buildGetClientEndpointParam(
           context.addStatements(
             `const ${paramName} = options.${paramName} ?? ${defaultValue};`
           );
+          assignedOptionalParams.add(paramName);
         } else if (templateParam.optional) {
           context.addStatements(`const ${paramName} = options.${paramName};`);
+          assignedOptionalParams.add(paramName);
         }
         parameterizedEndpointUrl = parameterizedEndpointUrl.replace(
           `{${templateParam.name}}`,
@@ -219,7 +244,7 @@ export function buildGetClientEndpointParam(
       }
       const endpointUrl = `const endpointUrl = ${coreEndpointParam} ?? \`${parameterizedEndpointUrl}\`;`;
       context.addStatements(endpointUrl);
-      return "endpointUrl";
+      return { endpointParamName: "endpointUrl", assignedOptionalParams };
     } else if (endpointParam.type.kind === "endpoint") {
       const clientDefaultValue =
         endpointParam.type.templateArguments[0]?.clientDefaultValue;
@@ -231,14 +256,14 @@ export function buildGetClientEndpointParam(
             : `String(${getClientParameterName(endpointParam)})`;
       const endpointUrl = `const endpointUrl = ${coreEndpointParam} ?? ${defaultValueStr};`;
       context.addStatements(endpointUrl);
-      return "endpointUrl";
+      return { endpointParamName: "endpointUrl" };
     }
     const endpointUrl = `const endpointUrl = ${coreEndpointParam} ?? String(${getClientParameterName(endpointParam)});`;
     context.addStatements(endpointUrl);
-    return "endpointUrl";
+    return { endpointParamName: "endpointUrl" };
   }
 
-  return "endpointUrl";
+  return { endpointParamName: "endpointUrl" };
 }
 
 /**
@@ -246,12 +271,14 @@ export function buildGetClientEndpointParam(
  *
  * @param context - context in which the options are being passed; statements will be added to this context
  *                  to help build the options shape
+ * @param apiVersionParamName - the name of the api version parameter in options (e.g., "apiVersion" or "version")
  * @returns - an expression representing the options to be passed in to getClient
  */
 export function buildGetClientOptionsParam(
   context: StatementedNode,
   emitterOptions: ModularEmitterOptions,
-  endpointParam: string
+  endpointParam: string,
+  apiVersionParamName?: string
 ): string {
   const userAgentOptions = buildUserAgentOptions(
     context,
@@ -261,7 +288,9 @@ export function buildGetClientOptionsParam(
   const loggingOptions = buildLoggingOptions(emitterOptions.options.flavor);
   const credentials = buildCredentials(emitterOptions, endpointParam);
 
-  let expr = "const { apiVersion: _, ...updatedOptions } = {";
+  // Use the actual api version parameter name for destructuring, defaulting to "apiVersion"
+  const apiVersionDestructure = apiVersionParamName ?? "apiVersion";
+  let expr = `const { ${apiVersionDestructure}: _, ...updatedOptions } = {`;
 
   expr += "...options,";
 

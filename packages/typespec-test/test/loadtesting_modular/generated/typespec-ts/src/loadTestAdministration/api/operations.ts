@@ -54,20 +54,16 @@ export function _deleteTestSend(
     "/tests/{testId}{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _deleteTestDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _deleteTestDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -97,20 +93,16 @@ export function _deleteTestFileSend(
     {
       testId: testId,
       fileName: fileName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _deleteTestFileDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _deleteTestFileDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -142,7 +134,7 @@ export function _uploadTestFileSend(
     {
       testId: testId,
       fileName: fileName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       fileType: options?.fileType,
     },
     {
@@ -154,10 +146,7 @@ export function _uploadTestFileSend(
     .put({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/octet-stream",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: body,
     });
 }
@@ -185,13 +174,7 @@ export async function uploadTestFile(
   body: Uint8Array,
   options: UploadTestFileOptionalParams = { requestOptions: {} },
 ): Promise<TestFileInfo> {
-  const result = await _uploadTestFileSend(
-    context,
-    testId,
-    fileName,
-    body,
-    options,
-  );
+  const result = await _uploadTestFileSend(context, testId, fileName, body, options);
   return _uploadTestFileDeserialize(result);
 }
 
@@ -202,7 +185,7 @@ export function _listTestsSend(
   const path = expandUrlTemplate(
     "/tests{?api%2Dversion,orderby,search,lastModifiedStartTime,lastModifiedEndTime,maxpagesize}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       orderby: options?.orderby,
       search: options?.search,
       lastModifiedStartTime: !options?.lastModifiedStartTime
@@ -221,16 +204,11 @@ export function _listTestsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _listTestsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<_PagedTest> {
+export async function _listTestsDeserialize(result: PathUncheckedResponse): Promise<_PagedTest> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -252,7 +230,11 @@ export function listTests(
     () => _listTestsSend(context, options),
     _listTestsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -265,7 +247,7 @@ export function _listTestFilesSend(
     "/tests/{testId}/files{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -275,10 +257,7 @@ export function _listTestFilesSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -304,7 +283,11 @@ export function listTestFiles(
     () => _listTestFilesSend(context, testId, options),
     _listTestFilesDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -319,7 +302,7 @@ export function _getTestFileSend(
     {
       testId: testId,
       fileName: fileName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -329,10 +312,7 @@ export function _getTestFileSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -367,7 +347,7 @@ export function _getTestSend(
     "/tests/{testId}{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -377,16 +357,11 @@ export function _getTestSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _getTestDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Test> {
+export async function _getTestDeserialize(result: PathUncheckedResponse): Promise<Test> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -414,7 +389,7 @@ export function _getServerMetricsConfigSend(
     "/tests/{testId}/server-metrics-config{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -424,10 +399,7 @@ export function _getServerMetricsConfigSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -461,7 +433,7 @@ export function _getAppComponentsSend(
     "/tests/{testId}/app-components{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -471,10 +443,7 @@ export function _getAppComponentsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -503,15 +472,13 @@ export function _createOrUpdateServerMetricsConfigSend(
   context: Client,
   testId: string,
   body: TestServerMetricConfig,
-  options: CreateOrUpdateServerMetricsConfigOptionalParams = {
-    requestOptions: {},
-  },
+  options: CreateOrUpdateServerMetricsConfigOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/tests/{testId}/server-metrics-config{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -522,10 +489,7 @@ export function _createOrUpdateServerMetricsConfigSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testServerMetricConfigSerializer(body),
     });
 }
@@ -546,16 +510,9 @@ export async function createOrUpdateServerMetricsConfig(
   context: Client,
   testId: string,
   body: TestServerMetricConfig,
-  options: CreateOrUpdateServerMetricsConfigOptionalParams = {
-    requestOptions: {},
-  },
+  options: CreateOrUpdateServerMetricsConfigOptionalParams = { requestOptions: {} },
 ): Promise<TestServerMetricConfig> {
-  const result = await _createOrUpdateServerMetricsConfigSend(
-    context,
-    testId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateServerMetricsConfigSend(context, testId, body, options);
   return _createOrUpdateServerMetricsConfigDeserialize(result);
 }
 
@@ -569,7 +526,7 @@ export function _createOrUpdateAppComponentsSend(
     "/tests/{testId}/app-components{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -580,10 +537,7 @@ export function _createOrUpdateAppComponentsSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testAppComponentsSerializer(body),
     });
 }
@@ -606,12 +560,7 @@ export async function createOrUpdateAppComponents(
   body: TestAppComponents,
   options: CreateOrUpdateAppComponentsOptionalParams = { requestOptions: {} },
 ): Promise<TestAppComponents> {
-  const result = await _createOrUpdateAppComponentsSend(
-    context,
-    testId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateAppComponentsSend(context, testId, body, options);
   return _createOrUpdateAppComponentsDeserialize(result);
 }
 
@@ -625,7 +574,7 @@ export function _createOrUpdateTestSend(
     "/tests/{testId}{?api%2Dversion}",
     {
       testId: testId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -636,17 +585,12 @@ export function _createOrUpdateTestSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testSerializer(body),
     });
 }
 
-export async function _createOrUpdateTestDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Test> {
+export async function _createOrUpdateTestDeserialize(result: PathUncheckedResponse): Promise<Test> {
   const expectedStatuses = ["201", "200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);

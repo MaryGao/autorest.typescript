@@ -204,6 +204,75 @@ export declare interface FormDataFileArrayAndBasicMediaTypesParam {
 
 export declare type FormDataFileArrayAndBasicParameters = FormDataFileArrayAndBasicMediaTypesParam & FormDataFileArrayAndBasicBodyParam & RequestParameters;
 
+export declare interface FormDataFileUploadFileArray {
+    post(options: FormDataFileUploadFileArrayParameters): StreamableMethod<FormDataFileUploadFileArray204Response>;
+}
+
+export declare interface FormDataFileUploadFileArray204Response extends HttpResponse {
+    status: "204";
+}
+
+export declare interface FormDataFileUploadFileArrayBodyParam {
+    body: FormData | Array<{
+        name: "files";
+        body: string | Uint8Array | ReadableStream<Uint8Array> | NodeJS.ReadableStream | File;
+        filename?: string;
+        contentType?: string;
+    }>;
+}
+
+export declare interface FormDataFileUploadFileArrayMediaTypesParam {
+    contentType: "multipart/form-data";
+}
+
+export declare type FormDataFileUploadFileArrayParameters = FormDataFileUploadFileArrayMediaTypesParam & FormDataFileUploadFileArrayBodyParam & RequestParameters;
+
+export declare interface FormDataFileUploadFileRequiredFilename {
+    post(options: FormDataFileUploadFileRequiredFilenameParameters): StreamableMethod<FormDataFileUploadFileRequiredFilename204Response>;
+}
+
+export declare interface FormDataFileUploadFileRequiredFilename204Response extends HttpResponse {
+    status: "204";
+}
+
+export declare interface FormDataFileUploadFileRequiredFilenameBodyParam {
+    body: FormData | Array<{
+        name: "file";
+        body: string | Uint8Array | ReadableStream<Uint8Array> | NodeJS.ReadableStream | File;
+        filename?: string;
+        contentType?: string;
+    }>;
+}
+
+export declare interface FormDataFileUploadFileRequiredFilenameMediaTypesParam {
+    contentType: "multipart/form-data";
+}
+
+export declare type FormDataFileUploadFileRequiredFilenameParameters = FormDataFileUploadFileRequiredFilenameMediaTypesParam & FormDataFileUploadFileRequiredFilenameBodyParam & RequestParameters;
+
+export declare interface FormDataFileUploadFileSpecificContentType {
+    post(options: FormDataFileUploadFileSpecificContentTypeParameters): StreamableMethod<FormDataFileUploadFileSpecificContentType204Response>;
+}
+
+export declare interface FormDataFileUploadFileSpecificContentType204Response extends HttpResponse {
+    status: "204";
+}
+
+export declare interface FormDataFileUploadFileSpecificContentTypeBodyParam {
+    body: FormData | Array<{
+        name: "file";
+        body: string | Uint8Array | ReadableStream<Uint8Array> | NodeJS.ReadableStream | File;
+        filename?: string;
+        contentType?: string;
+    }>;
+}
+
+export declare interface FormDataFileUploadFileSpecificContentTypeMediaTypesParam {
+    contentType: "multipart/form-data";
+}
+
+export declare type FormDataFileUploadFileSpecificContentTypeParameters = FormDataFileUploadFileSpecificContentTypeMediaTypesParam & FormDataFileUploadFileSpecificContentTypeBodyParam & RequestParameters;
+
 export declare interface FormDataHttpPartsContentTypeImageJpegContentType {
     post(options: FormDataHttpPartsContentTypeImageJpegContentTypeParameters): StreamableMethod<FormDataHttpPartsContentTypeImageJpegContentType204Response>;
 }
@@ -333,6 +402,42 @@ export declare interface FormDataMultiBinaryPartsMediaTypesParam {
 
 export declare type FormDataMultiBinaryPartsParameters = FormDataMultiBinaryPartsMediaTypesParam & FormDataMultiBinaryPartsBodyParam & RequestParameters;
 
+export declare interface FormDataOptionalParts {
+    post(options: FormDataOptionalPartsParameters): StreamableMethod<FormDataOptionalParts204Response>;
+}
+
+export declare interface FormDataOptionalParts204Response extends HttpResponse {
+    status: "204";
+}
+
+export declare interface FormDataOptionalPartsBodyParam {
+    body: MultiPartOptionalRequest;
+}
+
+export declare interface FormDataOptionalPartsMediaTypesParam {
+    contentType: "multipart/form-data";
+}
+
+export declare type FormDataOptionalPartsParameters = FormDataOptionalPartsMediaTypesParam & FormDataOptionalPartsBodyParam & RequestParameters;
+
+export declare interface FormDataWithWireName {
+    post(options: FormDataWithWireNameParameters): StreamableMethod<FormDataWithWireName204Response>;
+}
+
+export declare interface FormDataWithWireName204Response extends HttpResponse {
+    status: "204";
+}
+
+export declare interface FormDataWithWireNameBodyParam {
+    body: MultiPartRequestWithWireName;
+}
+
+export declare interface FormDataWithWireNameMediaTypesParam {
+    contentType: "multipart/form-data";
+}
+
+export declare type FormDataWithWireNameParameters = FormDataWithWireNameMediaTypesParam & FormDataWithWireNameBodyParam & RequestParameters;
+
 export declare type JsonPartRequest = FormData | Array<JsonPartRequestAddressPartDescriptor | JsonPartRequestProfileImagePartDescriptor>;
 
 export declare interface JsonPartRequestAddressPartDescriptor {
@@ -370,6 +475,20 @@ export declare type MultiPartClient = Client & {
 export declare interface MultiPartClientOptions extends ClientOptions {
 }
 
+export declare type MultiPartOptionalRequest = FormData | Array<MultiPartOptionalRequestIdPartDescriptor | MultiPartOptionalRequestProfileImagePartDescriptor>;
+
+export declare interface MultiPartOptionalRequestIdPartDescriptor {
+    name: "id";
+    body: string;
+}
+
+export declare interface MultiPartOptionalRequestProfileImagePartDescriptor {
+    name: "profileImage";
+    body: string | Uint8Array | ReadableStream<Uint8Array> | NodeJS.ReadableStream | File;
+    filename?: string;
+    contentType?: string;
+}
+
 export declare type MultiPartRequest = FormData | Array<MultiPartRequestIdPartDescriptor | MultiPartRequestProfileImagePartDescriptor>;
 
 export declare interface MultiPartRequestIdPartDescriptor {
@@ -384,8 +503,24 @@ export declare interface MultiPartRequestProfileImagePartDescriptor {
     contentType?: string;
 }
 
+export declare type MultiPartRequestWithWireName = FormData | Array<MultiPartRequestWithWireNameIdentifierPartDescriptor | MultiPartRequestWithWireNameImagePartDescriptor>;
+
+export declare interface MultiPartRequestWithWireNameIdentifierPartDescriptor {
+    name: "identifier";
+    body: string;
+}
+
+export declare interface MultiPartRequestWithWireNameImagePartDescriptor {
+    name: "image";
+    body: string | Uint8Array | ReadableStream<Uint8Array> | NodeJS.ReadableStream | File;
+    filename?: string;
+    contentType?: string;
+}
+
 export declare interface Routes {
     (path: "/multipart/form-data/mixed-parts"): FormDataBasic;
+    (path: "/multipart/form-data/mixed-parts-with-wire-name"): FormDataWithWireName;
+    (path: "/multipart/form-data/optional-parts"): FormDataOptionalParts;
     (path: "/multipart/form-data/complex-parts"): FormDataFileArrayAndBasic;
     (path: "/multipart/form-data/json-part"): FormDataJsonPart;
     (path: "/multipart/form-data/binary-array-parts"): FormDataBinaryArrayParts;
@@ -393,6 +528,9 @@ export declare interface Routes {
     (path: "/multipart/form-data/check-filename-and-content-type"): FormDataCheckFileNameAndContentType;
     (path: "/multipart/form-data/anonymous-model"): FormDataAnonymousModel;
     (path: "/multipart/form-data/complex-parts-with-httppart"): FormDataHttpPartsJsonArrayAndFileArray;
+    (path: "/multipart/form-data/file/specific-content-type"): FormDataFileUploadFileSpecificContentType;
+    (path: "/multipart/form-data/file/required-filename"): FormDataFileUploadFileRequiredFilename;
+    (path: "/multipart/form-data/file/file-array"): FormDataFileUploadFileArray;
     (path: "/multipart/form-data/check-filename-and-specific-content-type-with-httppart"): FormDataHttpPartsContentTypeImageJpegContentType;
     (path: "/multipart/form-data/check-filename-and-required-content-type-with-httppart"): FormDataHttpPartsContentTypeRequiredContentType;
     (path: "/multipart/form-data/file-with-http-part-optional-content-type"): FormDataHttpPartsContentTypeOptionalContentType;

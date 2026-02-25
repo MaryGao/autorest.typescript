@@ -92,10 +92,7 @@ describe("show example demo", () => {
       "required header",
       "required query",
       { name: "body name" },
-      {
-        optionalHeader: "optional header",
-        renamedOptional: "renamed optional query",
-      },
+      { optionalHeader: "optional header", renamedOptional: "renamed optional query" },
     );
     assert.ok(result);
   });

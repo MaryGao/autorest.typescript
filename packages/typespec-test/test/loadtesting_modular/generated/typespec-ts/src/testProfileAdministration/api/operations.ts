@@ -34,7 +34,7 @@ export function _listTestProfilesSend(
   const path = expandUrlTemplate(
     "/test-profiles{?api%2Dversion,maxpagesize,lastModifiedStartTime,lastModifiedEndTime,testProfileIds,testIds}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       maxpagesize: options?.maxpagesize,
       lastModifiedStartTime: !options?.lastModifiedStartTime
         ? options?.lastModifiedStartTime
@@ -53,10 +53,7 @@ export function _listTestProfilesSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -81,7 +78,11 @@ export function listTestProfiles(
     () => _listTestProfilesSend(context, options),
     _listTestProfilesDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -94,7 +95,7 @@ export function _getTestProfileSend(
     "/test-profiles/{testProfileId}{?api%2Dversion}",
     {
       testProfileId: testProfileId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -104,10 +105,7 @@ export function _getTestProfileSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -141,20 +139,16 @@ export function _deleteTestProfileSend(
     "/test-profiles/{testProfileId}{?api%2Dversion}",
     {
       testProfileId: testProfileId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _deleteTestProfileDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _deleteTestProfileDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -183,7 +177,7 @@ export function _createOrUpdateTestProfileSend(
     "/test-profiles/{testProfileId}{?api%2Dversion}",
     {
       testProfileId: testProfileId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -194,10 +188,7 @@ export function _createOrUpdateTestProfileSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testProfileSerializer(body),
     });
 }
@@ -220,11 +211,6 @@ export async function createOrUpdateTestProfile(
   body: TestProfile,
   options: CreateOrUpdateTestProfileOptionalParams = { requestOptions: {} },
 ): Promise<TestProfile> {
-  const result = await _createOrUpdateTestProfileSend(
-    context,
-    testProfileId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateTestProfileSend(context, testProfileId, body, options);
   return _createOrUpdateTestProfileDeserialize(result);
 }

@@ -73,7 +73,7 @@ export function _updateKeySend(
     {
       "key-name": keyName,
       "key-version": keyVersion,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2022-05-15-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -84,17 +84,12 @@ export function _updateKeySend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "text/plain",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: parameters,
     });
 }
 
-export async function _updateKeyDeserialize(
-  result: PathUncheckedResponse,
-): Promise<KeyBundle> {
+export async function _updateKeyDeserialize(result: PathUncheckedResponse): Promise<KeyBundle> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -111,13 +106,7 @@ export async function updateKey(
   parameters: string,
   options: UpdateKeyOptionalParams = { requestOptions: {} },
 ): Promise<KeyBundle> {
-  const result = await _updateKeySend(
-    context,
-    keyName,
-    keyVersion,
-    parameters,
-    options,
-  );
+  const result = await _updateKeySend(context, keyName, keyVersion, parameters, options);
   return _updateKeyDeserialize(result);
 }
 ```

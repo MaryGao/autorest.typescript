@@ -317,13 +317,25 @@ export const azureRlcTsps = [
     inputPath: "azure/resource-manager/non-resource"
   },
   {
+    outputPath: "azure/client-generator-core/api-version/header",
+    inputPath: "azure/client-generator-core/api-version/header"
+  },
+  {
+    outputPath: "azure/client-generator-core/api-version/path",
+    inputPath: "azure/client-generator-core/api-version/path"
+  },
+  {
+    outputPath: "azure/client-generator-core/api-version/query",
+    inputPath: "azure/client-generator-core/api-version/query"
+  },
+  {
     outputPath: "azure/resource-manager/large-header",
     inputPath: "azure/resource-manager/large-header"
   },
-  {
-    outputPath: "azure/client-generator-core/client-initialization",
-    inputPath: "azure/client-generator-core/client-initialization"
-  },
+  // {
+  //   outputPath: "azure/client-generator-core/client-initialization",
+  //   inputPath: "azure/client-generator-core/client-initialization"
+  // },
   {
     outputPath: "azure/client-generator-core/deserialize-empty-string-as-null",
     inputPath: "azure/client-generator-core/deserialize-empty-string-as-null"
@@ -333,8 +345,27 @@ export const azureRlcTsps = [
     inputPath: "azure/resource-manager/operation-templates"
   },
   {
-    outputPath: "azure/client-generator-core/client-location",
-    inputPath: "azure/client-generator-core/client-location"
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-existing-sub-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-to-existing-sub-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-new-sub-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-to-new-sub-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-root-client",
+    inputPath: "azure/client-generator-core/client-location/move-to-root-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-method-parameter-to-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-method-parameter-to-client"
   },
   {
     outputPath: "client/overload",
@@ -345,12 +376,20 @@ export const azureRlcTsps = [
     inputPath: "azure/client-generator-core/override"
   },
   {
+    outputPath: "azure/client-generator-core/alternate-type",
+    inputPath: "azure/client-generator-core/alternate-type"
+  },
+  {
     outputPath: "azure/versioning/previewVersion",
     inputPath: "azure/versioning/previewVersion"
   },
   {
     outputPath: "azure/resource-manager/method-subscription-id",
     inputPath: "azure/resource-manager/method-subscription-id"
+  },
+  {
+    outputPath: "azure/client-generator-core/next-link-verb",
+    inputPath: "azure/client-generator-core/next-link-verb"
   }
 ];
 
@@ -724,9 +763,13 @@ export const azureModularTsps = [
     outputPath: "payload/media-type",
     inputPath: "payload/media-type"
   },
+  // {
+  //   outputPath: "payload/multipart",
+  //   inputPath: "payload/multipart"
+  // },
   {
-    outputPath: "payload/multipart",
-    inputPath: "payload/multipart"
+    outputPath: "payload/xml",
+    inputPath: "payload/xml"
   },
   {
     outputPath: "server/versions/versioned",
@@ -861,12 +904,32 @@ export const azureModularTsps = [
     inputPath: "azure/encode/duration"
   },
   {
-    outputPath: "azure/client-generator-core/client-initialization",
-    inputPath: "azure/client-generator-core/client-initialization"
+    outputPath: "azure/client-generator-core/client-initialization/default",
+    inputPath: "azure/client-generator-core/client-initialization/default"
+  },
+  {
+    outputPath: "azure/client-generator-core/client-initialization/individually",
+    inputPath: "azure/client-generator-core/client-initialization/individually"
+  },
+  {
+    outputPath: "azure/client-generator-core/client-initialization/individuallyParent",
+    inputPath: "azure/client-generator-core/client-initialization/individuallyParent"
   },
   {
     outputPath: "azure/resource-manager/non-resource",
     inputPath: "azure/resource-manager/non-resource"
+  },
+  {
+    outputPath: "azure/client-generator-core/api-version/header",
+    inputPath: "azure/client-generator-core/api-version/header"
+  },
+  {
+    outputPath: "azure/client-generator-core/api-version/path",
+    inputPath: "azure/client-generator-core/api-version/path"
+  },
+  {
+    outputPath: "azure/client-generator-core/api-version/query",
+    inputPath: "azure/client-generator-core/api-version/query"
   },
   {
     outputPath: "azure/resource-manager/large-header",
@@ -893,19 +956,48 @@ export const azureModularTsps = [
     inputPath: "azure/client-generator-core/override"
   },
   {
+    outputPath: "azure/client-generator-core/alternate-type",
+    inputPath: "azure/client-generator-core/alternate-type"
+  },
+  {
     outputPath: "azure/versioning/previewVersion",
     inputPath: "azure/versioning/previewVersion"
   },
-  // skip due to issue https://github.com/Azure/autorest.typescript/issues/3468
-  // {
-  //   outputPath: "azure/resource-manager/method-subscription-id",
-  //   inputPath: "azure/resource-manager/method-subscription-id"
-  // }
-  // skip due to issue https://github.com/Azure/autorest.typescript/issues/3494
-  // {
-  //   outputPath: "azure/client-generator-core/client-location",
-  //   inputPath: "azure/client-generator-core/client-location"
-  // }
+  {
+    outputPath: "azure/client-generator-core/next-link-verb",
+    inputPath: "azure/client-generator-core/next-link-verb"
+  },
+  {
+    outputPath: "special-headers/conditional-request",
+    inputPath: "special-headers/conditional-request"
+  },
+  {
+    outputPath: "azure/resource-manager/method-subscription-id",
+    inputPath: "azure/resource-manager/method-subscription-id"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-existing-sub-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-to-existing-sub-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-new-sub-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-to-new-sub-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-to-root-client",
+    inputPath: "azure/client-generator-core/client-location/move-to-root-client"
+  },
+  {
+    outputPath:
+      "azure/client-generator-core/client-location/move-method-parameter-to-client",
+    inputPath:
+      "azure/client-generator-core/client-location/move-method-parameter-to-client"
+  }
 ];
 
 export const modularTsps = [
@@ -1030,10 +1122,10 @@ export const modularTsps = [
     outputPath: "payload/media-type",
     inputPath: "payload/media-type"
   },
-  {
-    outputPath: "payload/multipart",
-    inputPath: "payload/multipart"
-  },
+  // {
+  //   outputPath: "payload/multipart",
+  //   inputPath: "payload/multipart"
+  // },
   {
     outputPath: "server/versions/versioned",
     inputPath: "server/versions/versioned"
@@ -1105,5 +1197,13 @@ export const modularTsps = [
   {
     outputPath: "payload/pageable",
     inputPath: "payload/pageable"
+  },
+  {
+    outputPath: "encode/array",
+    inputPath: "encode/array"
+  },
+  {
+    outputPath: "payload/multipart",
+    inputPath: "payload/multipart"
   }
 ];

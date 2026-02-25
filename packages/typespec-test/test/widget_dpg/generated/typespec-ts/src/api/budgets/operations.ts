@@ -29,15 +29,12 @@ export function _$continueSend(
   context: Client,
   options: BudgetsContinueOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path("/budgets/widgets/continue")
     .get({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _$continueDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _$continueDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -73,25 +70,20 @@ export function _getBudgetsSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  context.pipeline.removePolicy({ name: "ClientApiVersionPolicy" });
   return context
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _getBudgetsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<Widget[]> {
+export async function _getBudgetsDeserialize(result: PathUncheckedResponse): Promise<Widget[]> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = widgetErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -117,7 +109,7 @@ export function _createOrReplaceSend(
     "/budgets/widgets/createOrReplace/users/{name}{?api%2Dversion}",
     {
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "1.0.0",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -128,17 +120,12 @@ export function _createOrReplaceSend(
     .put({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: sapUserSerializer(resource),
     });
 }
 
-export async function _createOrReplaceDeserialize(
-  result: PathUncheckedResponse,
-): Promise<SAPUser> {
+export async function _createOrReplaceDeserialize(result: PathUncheckedResponse): Promise<SAPUser> {
   const expectedStatuses = ["201", "200", "202"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -154,16 +141,11 @@ export function createOrReplace(
   resource: SAPUser,
   options: BudgetsCreateOrReplaceOptionalParams = { requestOptions: {} },
 ): PollerLike<OperationState<SAPUser>, SAPUser> {
-  return getLongRunningPoller(
-    context,
-    _createOrReplaceDeserialize,
-    ["201", "200", "202"],
-    {
-      updateIntervalInMs: options?.updateIntervalInMs,
-      abortSignal: options?.abortSignal,
-      getInitialResponse: () =>
-        _createOrReplaceSend(context, name, resource, options),
-      resourceLocationConfig: "original-uri",
-    },
-  ) as PollerLike<OperationState<SAPUser>, SAPUser>;
+  return getLongRunningPoller(context, _createOrReplaceDeserialize, ["201", "200", "202"], {
+    updateIntervalInMs: options?.updateIntervalInMs,
+    abortSignal: options?.abortSignal,
+    getInitialResponse: () => _createOrReplaceSend(context, name, resource, options),
+    resourceLocationConfig: "original-uri",
+    apiVersion: context.apiVersion ?? "1.0.0",
+  }) as PollerLike<OperationState<SAPUser>, SAPUser>;
 }

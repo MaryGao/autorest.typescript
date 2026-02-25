@@ -64,7 +64,7 @@ export function _stopTestRunSend(
     "/test-runs/{testRunId}:stop{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -74,16 +74,11 @@ export function _stopTestRunSend(
     .path(path)
     .post({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _stopTestRunDeserialize(
-  result: PathUncheckedResponse,
-): Promise<TestRun> {
+export async function _stopTestRunDeserialize(result: PathUncheckedResponse): Promise<TestRun> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -109,7 +104,7 @@ export function _listTestRunsSend(
   const path = expandUrlTemplate(
     "/test-runs{?api%2Dversion,orderby,search,testId,executionFrom,executionTo,status,maxpagesize}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       orderby: options?.orderby,
       search: options?.search,
       testId: options?.testId,
@@ -130,10 +125,7 @@ export function _listTestRunsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -158,7 +150,11 @@ export function listTestRuns(
     () => _listTestRunsSend(context, options),
     _listTestRunsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -174,7 +170,7 @@ export function _listMetricsSend(
     "/test-runs/{testRunId}/metrics{?api%2Dversion,aggregation,metricname,interval,metricNamespace,timespan}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       aggregation: options?.aggregation,
       metricname: metricname,
       interval: options?.interval,
@@ -190,19 +186,12 @@ export function _listMetricsSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
-      body: !options["body"]
-        ? options["body"]
-        : metricRequestPayloadSerializer(options["body"]),
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
+      body: !options["body"] ? options["body"] : metricRequestPayloadSerializer(options["body"]),
     });
 }
 
-export async function _listMetricsDeserialize(
-  result: PathUncheckedResponse,
-): Promise<_Metrics> {
+export async function _listMetricsDeserialize(result: PathUncheckedResponse): Promise<_Metrics> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -222,18 +211,14 @@ export function listMetrics(
 ): PagedAsyncIterableIterator<TimeSeriesElement> {
   return buildPagedAsyncIterator(
     context,
-    () =>
-      _listMetricsSend(
-        context,
-        testRunId,
-        metricname,
-        metricNamespace,
-        timespan,
-        options,
-      ),
+    () => _listMetricsSend(context, testRunId, metricname, metricNamespace, timespan, options),
     _listMetricsDeserialize,
     ["200"],
-    { itemName: "value", nextLinkName: "nextLink" },
+    {
+      itemName: "value",
+      nextLinkName: "nextLink",
+      apiVersion: context.apiVersion ?? "2024-05-01-preview",
+    },
   );
 }
 
@@ -246,7 +231,7 @@ export function _listMetricNamespacesSend(
     "/test-runs/{testRunId}/metric-namespaces{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -256,10 +241,7 @@ export function _listMetricNamespacesSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -294,7 +276,7 @@ export function _listMetricDefinitionsSend(
     "/test-runs/{testRunId}/metric-definitions{?api%2Dversion,metricNamespace}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       metricNamespace: metricNamespace,
     },
     {
@@ -305,10 +287,7 @@ export function _listMetricDefinitionsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -330,12 +309,7 @@ export async function listMetricDefinitions(
   metricNamespace: string,
   options: ListMetricDefinitionsOptionalParams = { requestOptions: {} },
 ): Promise<MetricDefinitionCollection> {
-  const result = await _listMetricDefinitionsSend(
-    context,
-    testRunId,
-    metricNamespace,
-    options,
-  );
+  const result = await _listMetricDefinitionsSend(context, testRunId, metricNamespace, options);
   return _listMetricDefinitionsDeserialize(result);
 }
 
@@ -353,7 +327,7 @@ export function _listMetricDimensionValuesSend(
     {
       testRunId: testRunId,
       name: name,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       metricname: metricname,
       interval: options?.interval,
       metricNamespace: metricNamespace,
@@ -367,10 +341,7 @@ export function _listMetricDimensionValuesSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -418,7 +389,7 @@ export function _getTestRunFileSend(
     {
       testRunId: testRunId,
       fileName: fileName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -428,10 +399,7 @@ export function _getTestRunFileSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -453,12 +421,7 @@ export async function getTestRunFile(
   fileName: string,
   options: GetTestRunFileOptionalParams = { requestOptions: {} },
 ): Promise<TestRunFileInfo> {
-  const result = await _getTestRunFileSend(
-    context,
-    testRunId,
-    fileName,
-    options,
-  );
+  const result = await _getTestRunFileSend(context, testRunId, fileName, options);
   return _getTestRunFileDeserialize(result);
 }
 
@@ -471,7 +434,7 @@ export function _getTestRunSend(
     "/test-runs/{testRunId}{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -481,16 +444,11 @@ export function _getTestRunSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
-export async function _getTestRunDeserialize(
-  result: PathUncheckedResponse,
-): Promise<TestRun> {
+export async function _getTestRunDeserialize(result: PathUncheckedResponse): Promise<TestRun> {
   const expectedStatuses = ["200"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -518,7 +476,7 @@ export function _getServerMetricsConfigSend(
     "/test-runs/{testRunId}/server-metrics-config{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -528,10 +486,7 @@ export function _getServerMetricsConfigSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -565,7 +520,7 @@ export function _getAppComponentsSend(
     "/test-runs/{testRunId}/app-components{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -575,10 +530,7 @@ export function _getAppComponentsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -615,20 +567,16 @@ export function _deleteTestRunSend(
     "/test-runs/{testRunId}{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
-export async function _deleteTestRunDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _deleteTestRunDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -651,15 +599,13 @@ export function _createOrUpdateServerMetricsConfigSend(
   context: Client,
   testRunId: string,
   body: TestRunServerMetricConfig,
-  options: CreateOrUpdateServerMetricsConfigOptionalParams = {
-    requestOptions: {},
-  },
+  options: CreateOrUpdateServerMetricsConfigOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/test-runs/{testRunId}/server-metrics-config{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -670,10 +616,7 @@ export function _createOrUpdateServerMetricsConfigSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testRunServerMetricConfigSerializer(body),
     });
 }
@@ -694,16 +637,9 @@ export async function createOrUpdateServerMetricsConfig(
   context: Client,
   testRunId: string,
   body: TestRunServerMetricConfig,
-  options: CreateOrUpdateServerMetricsConfigOptionalParams = {
-    requestOptions: {},
-  },
+  options: CreateOrUpdateServerMetricsConfigOptionalParams = { requestOptions: {} },
 ): Promise<TestRunServerMetricConfig> {
-  const result = await _createOrUpdateServerMetricsConfigSend(
-    context,
-    testRunId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateServerMetricsConfigSend(context, testRunId, body, options);
   return _createOrUpdateServerMetricsConfigDeserialize(result);
 }
 
@@ -717,7 +653,7 @@ export function _createOrUpdateAppComponentsSend(
     "/test-runs/{testRunId}/app-components{?api%2Dversion}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -728,10 +664,7 @@ export function _createOrUpdateAppComponentsSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testRunAppComponentsSerializer(body),
     });
 }
@@ -754,12 +687,7 @@ export async function createOrUpdateAppComponents(
   body: TestRunAppComponents,
   options: CreateOrUpdateAppComponentsOptionalParams = { requestOptions: {} },
 ): Promise<TestRunAppComponents> {
-  const result = await _createOrUpdateAppComponentsSend(
-    context,
-    testRunId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateAppComponentsSend(context, testRunId, body, options);
   return _createOrUpdateAppComponentsDeserialize(result);
 }
 
@@ -773,7 +701,7 @@ export function _createOrUpdateTestRunSend(
     "/test-runs/{testRunId}{?api%2Dversion,oldTestRunId}",
     {
       testRunId: testRunId,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-05-01-preview",
       oldTestRunId: options?.oldTestRunId,
     },
     {
@@ -785,10 +713,7 @@ export function _createOrUpdateTestRunSend(
     .patch({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/merge-patch+json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: testRunSerializer(body),
     });
 }
@@ -811,11 +736,6 @@ export async function createOrUpdateTestRun(
   body: TestRun,
   options: CreateOrUpdateTestRunOptionalParams = { requestOptions: {} },
 ): Promise<TestRun> {
-  const result = await _createOrUpdateTestRunSend(
-    context,
-    testRunId,
-    body,
-    options,
-  );
+  const result = await _createOrUpdateTestRunSend(context, testRunId, body, options);
   return _createOrUpdateTestRunDeserialize(result);
 }

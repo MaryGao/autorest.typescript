@@ -28,6 +28,12 @@ compatibility-mode: true
 Generated Models.
 
 ```ts models
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface SimpleModel */
 export interface SimpleModel extends Record<string, string> {
   propA: string;
@@ -110,6 +116,12 @@ Generated Models.
 ```ts models
 import { serializeRecord } from "../static-helpers/serialization/serialize-record.js";
 
+/**
+ * This file contains only generated model types and their (de)serializers.
+ * Disable the following rules for internal models with '_' prefix and deserializers which require 'any' for raw JSON input.
+ */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /** model interface SimpleModel */
 export interface SimpleModel {
   propA: string;
@@ -178,12 +190,10 @@ export interface NameConflictModel {
 
 export function nameConflictModelDeserializer(item: any): NameConflictModel {
   return {
-    additionalPropertiesBag: serializeRecord(item, [
-      "additionalProperties",
-      "propA",
-      "propB",
-    ]),
-    additionalProperties: item["additionalProperties"],
+    additionalPropertiesBag: serializeRecord(item, ["additionalProperties", "propA", "propB"]),
+    additionalProperties: Object.fromEntries(
+      Object.entries(item["additionalProperties"]).map(([k, p]: [string, any]) => [k, p]),
+    ),
     propA: item["propA"],
     propB: item["propB"],
   };
@@ -198,19 +208,12 @@ export interface ObjectAdditionalPropsModel {
   additionalPropertiesBag?: Record<string, string>;
 }
 
-export function objectAdditionalPropsModelDeserializer(
-  item: any,
-): ObjectAdditionalPropsModel {
+export function objectAdditionalPropsModelDeserializer(item: any): ObjectAdditionalPropsModel {
   return {
-    additionalPropertiesBag: serializeRecord(item, [
-      "additionalProperties",
-      "propA",
-      "propB",
-    ]),
-    additionalProperties:
-      _objectAdditionalPropsModelAdditionalPropertiesDeserializer(
-        item["additionalProperties"],
-      ),
+    additionalPropertiesBag: serializeRecord(item, ["additionalProperties", "propA", "propB"]),
+    additionalProperties: _objectAdditionalPropsModelAdditionalPropertiesDeserializer(
+      item["additionalProperties"],
+    ),
     propA: item["propA"],
     propB: item["propB"],
   };

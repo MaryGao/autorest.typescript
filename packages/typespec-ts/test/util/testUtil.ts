@@ -4,8 +4,10 @@ import { TestHost } from "@typespec/compiler/testing";
 import { RestTestLibrary } from "@typespec/rest/testing";
 import { HttpTestLibrary } from "@typespec/http/testing";
 import { VersioningTestLibrary } from "@typespec/versioning/testing";
+import { XmlTestLibrary } from "@typespec/xml/testing";
 import { AzureCoreTestLibrary } from "@azure-tools/typespec-azure-core/testing";
 import { SdkTestLibrary } from "@azure-tools/typespec-client-generator-core/testing";
+import { listAllServiceNamespaces } from "@azure-tools/typespec-client-generator-core";
 import { OpenAPITestLibrary } from "@typespec/openapi/testing";
 import { AutorestTestLibrary } from "@azure-tools/typespec-autorest/testing";
 import { AzureResourceManagerTestLibrary } from "@azure-tools/typespec-azure-resource-manager/testing";
@@ -27,7 +29,8 @@ import {
   PagingHelpers,
   PollingHelpers,
   SerializationHelpers,
-  UrlTemplateHelpers
+  UrlTemplateHelpers,
+  XmlHelpers
 } from "../../src/modular/static-helpers-metadata.js";
 import {
   AzureCoreDependencies,
@@ -51,6 +54,7 @@ export async function createRLCEmitterTestHost() {
       VersioningTestLibrary,
       AzureCoreTestLibrary,
       SdkTestLibrary,
+      XmlTestLibrary,
       AzureResourceManagerTestLibrary,
       OpenAPITestLibrary,
       AutorestTestLibrary
@@ -96,6 +100,7 @@ export async function rlcEmitterFor(
 import "@typespec/http";
 import "@typespec/rest";
 import "@typespec/versioning";
+import "@typespec/xml";
 ${needTCGC ? 'import "@azure-tools/typespec-client-generator-core";' : ""} 
 ${needAzureCore ? 'import "@azure-tools/typespec-azure-core";' : ""} 
 ${
@@ -107,6 +112,7 @@ ${
 using Rest; 
 using Http;
 using Versioning;
+using Xml;
 ${needTCGC ? "using Azure.ClientGenerator.Core;" : ""}
 ${needAzureCore ? "using Azure.Core;" : ""}
 ${needNamespaces ? namespace : ""}
@@ -161,13 +167,15 @@ import "@typespec/versioning";
 import "@azure-tools/typespec-client-generator-core";
 import "@azure-tools/typespec-azure-core";
 import "@azure-tools/typespec-azure-resource-manager";
+import "@typespec/xml";
 
 using Rest; 
 using Http;
 using Versioning;
 using Azure.ClientGenerator.Core;
 using Azure.Core;
-using Azure.ResourceManager;`;
+using Azure.ResourceManager;
+using Xml;`;
 }
 
 function serviceStatement() {
@@ -210,7 +218,8 @@ export async function createDpgContextTestHelper(
       ...configs
     },
     emitterName: "@azure-tools/typespec-ts",
-    originalProgram: program
+    originalProgram: program,
+    allServiceNamespaces: listAllServiceNamespaces(context)
   } as SdkContext;
 
   provideContext("emitContext", {
@@ -266,6 +275,7 @@ export async function provideBinderWithAzureDependencies(project: Project) {
   };
 
   const staticHelpers = {
+    ...XmlHelpers,
     ...SerializationHelpers,
     ...PagingHelpers,
     ...PollingHelpers,

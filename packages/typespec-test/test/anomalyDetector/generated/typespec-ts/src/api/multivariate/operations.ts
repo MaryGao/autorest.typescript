@@ -44,9 +44,7 @@ export function _detectMultivariateLastAnomalySend(
   context: Client,
   modelId: string,
   options: MultivariateMultivariateLastDetectionOptions,
-  optionalParams: MultivariateDetectMultivariateLastAnomalyOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: MultivariateDetectMultivariateLastAnomalyOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/models/{modelId}:detect-last",
@@ -62,10 +60,7 @@ export function _detectMultivariateLastAnomalySend(
     .post({
       ...operationOptionsToRequestParameters(optionalParams),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...optionalParams.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...optionalParams.requestOptions?.headers },
       body: multivariateMultivariateLastDetectionOptionsSerializer(options),
     });
 }
@@ -77,6 +72,7 @@ export async function _detectMultivariateLastAnomalyDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -93,9 +89,7 @@ export async function detectMultivariateLastAnomaly(
   context: Client,
   modelId: string,
   options: MultivariateMultivariateLastDetectionOptions,
-  optionalParams: MultivariateDetectMultivariateLastAnomalyOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: MultivariateDetectMultivariateLastAnomalyOptionalParams = { requestOptions: {} },
 ): Promise<MultivariateMultivariateLastDetectionResult> {
   const result = await _detectMultivariateLastAnomalySend(
     context,
@@ -110,9 +104,7 @@ export function _detectMultivariateBatchAnomalySend(
   context: Client,
   modelId: string,
   options: MultivariateMultivariateBatchDetectionOptions,
-  optionalParams: MultivariateDetectMultivariateBatchAnomalyOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: MultivariateDetectMultivariateBatchAnomalyOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/models/{modelId}:detect-batch",
@@ -128,10 +120,7 @@ export function _detectMultivariateBatchAnomalySend(
     .post({
       ...operationOptionsToRequestParameters(optionalParams),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...optionalParams.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...optionalParams.requestOptions?.headers },
       body: multivariateMultivariateBatchDetectionOptionsSerializer(options),
     });
 }
@@ -143,6 +132,7 @@ export async function _detectMultivariateBatchAnomalyDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -161,9 +151,7 @@ export async function detectMultivariateBatchAnomaly(
   context: Client,
   modelId: string,
   options: MultivariateMultivariateBatchDetectionOptions,
-  optionalParams: MultivariateDetectMultivariateBatchAnomalyOptionalParams = {
-    requestOptions: {},
-  },
+  optionalParams: MultivariateDetectMultivariateBatchAnomalyOptionalParams = { requestOptions: {} },
 ): Promise<MultivariateMultivariateDetectionResult> {
   const result = await _detectMultivariateBatchAnomalySend(
     context,
@@ -177,9 +165,7 @@ export async function detectMultivariateBatchAnomaly(
 export function _getMultivariateModelSend(
   context: Client,
   modelId: string,
-  options: MultivariateGetMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateGetMultivariateModelOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/models/{modelId}",
@@ -194,10 +180,7 @@ export function _getMultivariateModelSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -208,6 +191,7 @@ export async function _getMultivariateModelDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -221,9 +205,7 @@ export async function _getMultivariateModelDeserialize(
 export async function getMultivariateModel(
   context: Client,
   modelId: string,
-  options: MultivariateGetMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateGetMultivariateModelOptionalParams = { requestOptions: {} },
 ): Promise<MultivariateAnomalyDetectionModel> {
   const result = await _getMultivariateModelSend(context, modelId, options);
   return _getMultivariateModelDeserialize(result);
@@ -232,9 +214,7 @@ export async function getMultivariateModel(
 export function _deleteMultivariateModelSend(
   context: Client,
   modelId: string,
-  options: MultivariateDeleteMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateDeleteMultivariateModelOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/models/{modelId}",
@@ -245,9 +225,7 @@ export function _deleteMultivariateModelSend(
       allowReserved: options?.requestOptions?.skipUrlEncoding,
     },
   );
-  return context
-    .path(path)
-    .delete({ ...operationOptionsToRequestParameters(options) });
+  return context.path(path).delete({ ...operationOptionsToRequestParameters(options) });
 }
 
 export async function _deleteMultivariateModelDeserialize(
@@ -257,6 +235,7 @@ export async function _deleteMultivariateModelDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -267,9 +246,7 @@ export async function _deleteMultivariateModelDeserialize(
 export async function deleteMultivariateModel(
   context: Client,
   modelId: string,
-  options: MultivariateDeleteMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateDeleteMultivariateModelOptionalParams = { requestOptions: {} },
 ): Promise<void> {
   const result = await _deleteMultivariateModelSend(context, modelId, options);
   return _deleteMultivariateModelDeserialize(result);
@@ -277,9 +254,7 @@ export async function deleteMultivariateModel(
 
 export function _listMultivariateModelsSend(
   context: Client,
-  options: MultivariateListMultivariateModelsOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateListMultivariateModelsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/models{?skip,top}",
@@ -295,10 +270,7 @@ export function _listMultivariateModelsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -309,6 +281,7 @@ export async function _listMultivariateModelsDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -318,9 +291,7 @@ export async function _listMultivariateModelsDeserialize(
 /** List models of a resource. */
 export function listMultivariateModels(
   context: Client,
-  options: MultivariateListMultivariateModelsOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateListMultivariateModelsOptionalParams = { requestOptions: {} },
 ): PagedAsyncIterableIterator<MultivariateAnomalyDetectionModel> {
   return buildPagedAsyncIterator(
     context,
@@ -334,19 +305,14 @@ export function listMultivariateModels(
 export function _trainMultivariateModelSend(
   context: Client,
   modelInfo: MultivariateModelInfo,
-  options: MultivariateTrainMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateTrainMultivariateModelOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   return context
     .path("/multivariate/models")
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: multivariateModelInfoSerializer(modelInfo),
     });
 }
@@ -358,6 +324,7 @@ export async function _trainMultivariateModelDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -376,9 +343,7 @@ export async function _trainMultivariateModelDeserialize(
 export async function trainMultivariateModel(
   context: Client,
   modelInfo: MultivariateModelInfo,
-  options: MultivariateTrainMultivariateModelOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateTrainMultivariateModelOptionalParams = { requestOptions: {} },
 ): Promise<MultivariateAnomalyDetectionModel> {
   const result = await _trainMultivariateModelSend(context, modelInfo, options);
   return _trainMultivariateModelDeserialize(result);
@@ -387,9 +352,7 @@ export async function trainMultivariateModel(
 export function _getMultivariateBatchDetectionResultSend(
   context: Client,
   resultId: string,
-  options: MultivariateGetMultivariateBatchDetectionResultOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateGetMultivariateBatchDetectionResultOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/multivariate/detect-batch/{resultId}",
@@ -404,10 +367,7 @@ export function _getMultivariateBatchDetectionResultSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -418,6 +378,7 @@ export async function _getMultivariateBatchDetectionResultDeserialize(
   if (!expectedStatuses.includes(result.status)) {
     const error = createRestError(result);
     error.details = multivariateResponseErrorDeserializer(result.body);
+
     throw error;
   }
 
@@ -431,14 +392,8 @@ export async function _getMultivariateBatchDetectionResultDeserialize(
 export async function getMultivariateBatchDetectionResult(
   context: Client,
   resultId: string,
-  options: MultivariateGetMultivariateBatchDetectionResultOptionalParams = {
-    requestOptions: {},
-  },
+  options: MultivariateGetMultivariateBatchDetectionResultOptionalParams = { requestOptions: {} },
 ): Promise<MultivariateMultivariateDetectionResult> {
-  const result = await _getMultivariateBatchDetectionResultSend(
-    context,
-    resultId,
-    options,
-  );
+  const result = await _getMultivariateBatchDetectionResultSend(context, resultId, options);
   return _getMultivariateBatchDetectionResultDeserialize(result);
 }

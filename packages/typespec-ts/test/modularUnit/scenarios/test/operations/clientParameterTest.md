@@ -109,11 +109,7 @@ describe("list Widget resources", () => {
 
   it("should list Widget resources for widgetsListWidgets", async function () {
     const resArray = new Array();
-    for await (const item of client.widgets.listWidgets({
-      top: 8,
-      skip: 15,
-      maxpagesize: 27,
-    })) {
+    for await (const item of client.widgets.listWidgets({ top: 8, skip: 15, maxpagesize: 27 })) {
       resArray.push(item);
     }
     assert.ok(resArray);

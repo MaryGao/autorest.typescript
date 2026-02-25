@@ -4,12 +4,10 @@
 import { OperationOptions } from "@azure-rest/core-client";
 
 /** Optional parameters. */
-export interface SAPWidgetsAnalyzeWidgetOptionalParams
-  extends OperationOptions {}
+export interface SAPWidgetsAnalyzeWidgetOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
-export interface SAPWidgetsDeleteWidgetOptionalParams
-  extends OperationOptions {}
+export interface SAPWidgetsDeleteWidgetOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
 export interface SAPWidgetsUpdateWidgetOptionalParams extends OperationOptions {
@@ -20,32 +18,27 @@ export interface SAPWidgetsUpdateWidgetOptionalParams extends OperationOptions {
 }
 
 /** Optional parameters. */
-export interface SAPWidgetsCreateOrReplaceOptionalParams
-  extends OperationOptions {
+export interface SAPWidgetsCreateOrReplaceOptionalParams extends OperationOptions {
   /** Delay to wait until next poll, in milliseconds. */
   updateIntervalInMs?: number;
 }
 
 /** Optional parameters. */
-export interface SAPWidgetsCreateWidgetOptionalParams
-  extends OperationOptions {}
+export interface SAPWidgetsCreateWidgetOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
 export interface SAPWidgetsGetWidgetOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
-export interface SAPWidgetsQueryWidgetsPagesOptionalParams
-  extends OperationOptions {}
+export interface SAPWidgetsQueryWidgetsPagesOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
-export interface SAPWidgetsListWidgetsPagesOptionalParams
-  extends OperationOptions {}
+export interface SAPWidgetsListWidgetsPagesOptionalParams extends OperationOptions {}
 
 /** Optional parameters. */
-export interface SAPWidgetsSAPListWidgetsOptionalParams
-  extends OperationOptions {
+export interface SAPWidgetsSAPListWidgetsOptionalParams extends OperationOptions {
   optionalHeader?: string;
-  nullableOptionalHeader?: string | null;
+  nullableOptionalHeader?: string;
   optionalDateHeader?: Date;
-  nullableDateHeader?: Date | null;
+  nullableDateHeader?: Date;
 }

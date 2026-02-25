@@ -5,6 +5,7 @@
 ```ts
 
 import { AbortSignalLike } from '@azure/abort-controller';
+import { CancelOnProgress } from '@azure/core-lro';
 import { ClientOptions } from '@azure-rest/core-client';
 import { OperationOptions } from '@azure-rest/core-client';
 import { OperationState } from '@azure/core-lro';
@@ -37,6 +38,14 @@ export enum AzureClouds {
 
 // @public
 export type AzureSupportedClouds = `${AzureClouds}`;
+
+// @public
+export interface Client {
+    // (undocumented)
+    email: string;
+    // (undocumented)
+    id: string;
+}
 
 // @public
 export interface ConsumptionEndpointsProperties {
@@ -73,8 +82,27 @@ export type CreatedByType = string;
 
 // @public
 export interface DataProduct extends TrackedResource {
+    readonly availableMinorVersions?: string[];
+    readonly consumptionEndpoints?: ConsumptionEndpointsProperties;
+    currentMinorVersion?: string;
+    customerEncryptionKey?: EncryptionKeyDetails;
+    customerManagedKeyEncryptionEnabled?: ControlState;
+    readonly documentation?: string;
     identity?: ManagedServiceIdentityV4;
-    properties?: DataProductProperties;
+    readonly keyVaultUrl?: string;
+    majorVersion?: string;
+    managedResourceGroupConfiguration?: ManagedResourceGroupConfiguration;
+    networkacls?: DataProductNetworkAcls;
+    owners?: string[];
+    privateLinksEnabled?: ControlState;
+    product?: string;
+    readonly provisioningState?: ProvisioningState;
+    publicNetworkAccess?: ControlState;
+    publisher?: string;
+    purviewAccount?: string;
+    purviewCollection?: string;
+    redundancy?: ControlState;
+    readonly resourceGuid?: string;
 }
 
 // @public
@@ -183,6 +211,18 @@ export interface DataProductsListRolesAssignmentsOptionalParams extends Operatio
 // @public
 export interface DataProductsOperations {
     addUserRole: (resourceGroupName: string, dataProductName: string, body: RoleAssignmentCommonProperties, options?: DataProductsAddUserRoleOptionalParams) => Promise<RoleAssignmentDetail>;
+    // @deprecated (undocumented)
+    beginCreate: (resourceGroupName: string, dataProductName: string, resource: DataProduct, options?: DataProductsCreateOptionalParams) => Promise<SimplePollerLike<OperationState<DataProduct>, DataProduct>>;
+    // @deprecated (undocumented)
+    beginCreateAndWait: (resourceGroupName: string, dataProductName: string, resource: DataProduct, options?: DataProductsCreateOptionalParams) => Promise<DataProduct>;
+    // @deprecated (undocumented)
+    beginDelete: (resourceGroupName: string, dataProductName: string, options?: DataProductsDeleteOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
+    // @deprecated (undocumented)
+    beginDeleteAndWait: (resourceGroupName: string, dataProductName: string, options?: DataProductsDeleteOptionalParams) => Promise<void>;
+    // @deprecated (undocumented)
+    beginUpdate: (resourceGroupName: string, dataProductName: string, properties: DataProductUpdate, options?: DataProductsUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<DataProduct>, DataProduct>>;
+    // @deprecated (undocumented)
+    beginUpdateAndWait: (resourceGroupName: string, dataProductName: string, properties: DataProductUpdate, options?: DataProductsUpdateOptionalParams) => Promise<DataProduct>;
     create: (resourceGroupName: string, dataProductName: string, resource: DataProduct, options?: DataProductsCreateOptionalParams) => PollerLike<OperationState<DataProduct>, DataProduct>;
     delete: (resourceGroupName: string, dataProductName: string, options?: DataProductsDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
     generateStorageAccountSasToken: (resourceGroupName: string, dataProductName: string, body: AccountSas, options?: DataProductsGenerateStorageAccountSasTokenOptionalParams) => Promise<AccountSasToken>;
@@ -190,9 +230,15 @@ export interface DataProductsOperations {
     listByResourceGroup: (resourceGroupName: string, options?: DataProductsListByResourceGroupOptionalParams) => PagedAsyncIterableIterator<DataProduct>;
     listBySubscription: (options?: DataProductsListBySubscriptionOptionalParams) => PagedAsyncIterableIterator<DataProduct>;
     listRolesAssignments: (resourceGroupName: string, dataProductName: string, body: Record<string, any>, options?: DataProductsListRolesAssignmentsOptionalParams) => Promise<ListRoleAssignments>;
+    // (undocumented)
+    read: (body: Client, options?: DataProductsReadOptionalParams) => Promise<Client>;
     removeUserRole: (resourceGroupName: string, dataProductName: string, body: RoleAssignmentDetail, options?: DataProductsRemoveUserRoleOptionalParams) => Promise<void>;
     rotateKey: (resourceGroupName: string, dataProductName: string, body: KeyVaultInfo, options?: DataProductsRotateKeyOptionalParams) => Promise<void>;
     update: (resourceGroupName: string, dataProductName: string, properties: DataProductUpdate, options?: DataProductsUpdateOptionalParams) => PollerLike<OperationState<DataProduct>, DataProduct>;
+}
+
+// @public
+export interface DataProductsReadOptionalParams extends OperationOptions {
 }
 
 // @public
@@ -234,7 +280,13 @@ export interface DataProductVersion {
 
 // @public
 export interface DataType extends ProxyResource {
-    properties?: DataTypeProperties;
+    databaseCacheRetention?: number;
+    databaseRetention?: number;
+    readonly provisioningState?: ProvisioningState;
+    state?: DataTypeState;
+    readonly stateReason?: string;
+    storageOutputRetention?: number;
+    readonly visualizationUrl?: string;
 }
 
 // @public
@@ -277,6 +329,22 @@ export interface DataTypesListByDataProductOptionalParams extends OperationOptio
 
 // @public
 export interface DataTypesOperations {
+    // @deprecated (undocumented)
+    beginCreate: (resourceGroupName: string, dataProductName: string, dataTypeName: string, resource: DataType, options?: DataTypesCreateOptionalParams) => Promise<SimplePollerLike<OperationState<DataType>, DataType>>;
+    // @deprecated (undocumented)
+    beginCreateAndWait: (resourceGroupName: string, dataProductName: string, dataTypeName: string, resource: DataType, options?: DataTypesCreateOptionalParams) => Promise<DataType>;
+    // @deprecated (undocumented)
+    beginDelete: (resourceGroupName: string, dataProductName: string, dataTypeName: string, options?: DataTypesDeleteOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
+    // @deprecated (undocumented)
+    beginDeleteAndWait: (resourceGroupName: string, dataProductName: string, dataTypeName: string, options?: DataTypesDeleteOptionalParams) => Promise<void>;
+    // @deprecated (undocumented)
+    beginDeleteData: (resourceGroupName: string, dataProductName: string, dataTypeName: string, body: Record<string, any>, options?: DataTypesDeleteDataOptionalParams) => Promise<SimplePollerLike<OperationState<void>, void>>;
+    // @deprecated (undocumented)
+    beginDeleteDataAndWait: (resourceGroupName: string, dataProductName: string, dataTypeName: string, body: Record<string, any>, options?: DataTypesDeleteDataOptionalParams) => Promise<void>;
+    // @deprecated (undocumented)
+    beginUpdate: (resourceGroupName: string, dataProductName: string, dataTypeName: string, properties: DataTypeUpdate, options?: DataTypesUpdateOptionalParams) => Promise<SimplePollerLike<OperationState<DataType>, DataType>>;
+    // @deprecated (undocumented)
+    beginUpdateAndWait: (resourceGroupName: string, dataProductName: string, dataTypeName: string, properties: DataTypeUpdate, options?: DataTypesUpdateOptionalParams) => Promise<DataType>;
     create: (resourceGroupName: string, dataProductName: string, dataTypeName: string, resource: DataType, options?: DataTypesCreateOptionalParams) => PollerLike<OperationState<DataType>, DataType>;
     delete: (resourceGroupName: string, dataProductName: string, dataTypeName: string, options?: DataTypesDeleteOptionalParams) => PollerLike<OperationState<void>, void>;
     deleteData: (resourceGroupName: string, dataProductName: string, dataTypeName: string, body: Record<string, any>, options?: DataTypesDeleteDataOptionalParams) => PollerLike<OperationState<void>, void>;
@@ -441,6 +509,7 @@ export interface ManagedServiceIdentityV4 {
 
 // @public (undocumented)
 export class NetworkAnalyticsApi {
+    constructor(credential: TokenCredential, options?: NetworkAnalyticsApiOptionalParams);
     constructor(credential: TokenCredential, subscriptionId: string, options?: NetworkAnalyticsApiOptionalParams);
     readonly dataProducts: DataProductsOperations;
     readonly dataProductsCatalogs: DataProductsCatalogsOperations;
@@ -546,6 +615,28 @@ export interface RoleAssignmentDetail {
     roleAssignmentId: string;
     roleId: string;
     userName: string;
+}
+
+// @public
+export interface SimplePollerLike<TState extends OperationState<TResult>, TResult> {
+    getOperationState(): TState;
+    getResult(): TResult | undefined;
+    isDone(): boolean;
+    // @deprecated
+    isStopped(): boolean;
+    onProgress(callback: (state: TState) => void): CancelOnProgress;
+    poll(options?: {
+        abortSignal?: AbortSignalLike;
+    }): Promise<TState>;
+    pollUntilDone(pollOptions?: {
+        abortSignal?: AbortSignalLike;
+    }): Promise<TResult>;
+    serialize(): Promise<string>;
+    // @deprecated
+    stopPolling(): void;
+    submitted(): Promise<void>;
+    // @deprecated
+    toString(): string;
 }
 
 // @public

@@ -132,11 +132,7 @@ describe("a long-running resource action", () => {
     const credential = createTestCredential();
     const subscriptionId = env.SUBSCRIPTION_ID || "<SUBSCRIPTION_ID>";
     const clientOptions = recorder.configureClientOptions({});
-    client = new HardwareSecurityModulesClient(
-      credential,
-      subscriptionId,
-      clientOptions,
-    );
+    client = new HardwareSecurityModulesClient(credential, subscriptionId, clientOptions);
   });
 
   afterEach(async function () {
@@ -145,10 +141,7 @@ describe("a long-running resource action", () => {
 
   it("should a long-running resource action for cloudHsmClustersBackup", async function () {
     const result = await client.backup("rgcloudhsm", "chsm1", {
-      backupRequestProperties: {
-        azureStorageBlobContainerUri: "sss",
-        token: "aaa",
-      },
+      backupRequestProperties: { azureStorageBlobContainerUri: "sss", token: "aaa" },
     });
     assert.ok(result);
   });

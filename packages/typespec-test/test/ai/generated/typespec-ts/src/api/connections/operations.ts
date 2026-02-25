@@ -28,15 +28,13 @@ export function _getConnectionWithSecretsSend(
   context: Client,
   connectionName: string,
   ignored: string,
-  options: ConnectionsGetConnectionWithSecretsOptionalParams = {
-    requestOptions: {},
-  },
+  options: ConnectionsGetConnectionWithSecretsOptionalParams = { requestOptions: {} },
 ): StreamableMethod {
   const path = expandUrlTemplate(
     "/connections/{connectionName}/listsecrets{?api%2Dversion}",
     {
       connectionName: connectionName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -47,10 +45,7 @@ export function _getConnectionWithSecretsSend(
     .post({
       ...operationOptionsToRequestParameters(options),
       contentType: "application/json",
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
       body: { ignored: ignored },
     });
 }
@@ -71,16 +66,9 @@ export async function getConnectionWithSecrets(
   context: Client,
   connectionName: string,
   ignored: string,
-  options: ConnectionsGetConnectionWithSecretsOptionalParams = {
-    requestOptions: {},
-  },
+  options: ConnectionsGetConnectionWithSecretsOptionalParams = { requestOptions: {} },
 ): Promise<GetConnectionResponse> {
-  const result = await _getConnectionWithSecretsSend(
-    context,
-    connectionName,
-    ignored,
-    options,
-  );
+  const result = await _getConnectionWithSecretsSend(context, connectionName, ignored, options);
   return _getConnectionWithSecretsDeserialize(result);
 }
 
@@ -93,7 +81,7 @@ export function _getConnectionSend(
     "/connections/{connectionName}{?api%2Dversion}",
     {
       connectionName: connectionName,
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -103,10 +91,7 @@ export function _getConnectionSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -138,7 +123,7 @@ export function _listConnectionsSend(
   const path = expandUrlTemplate(
     "/connections{?api%2Dversion,category,includeAll,target}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
       category: options?.category,
       includeAll: options?.includeAll,
       target: options?.target,
@@ -151,10 +136,7 @@ export function _listConnectionsSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 
@@ -185,7 +167,7 @@ export function _getWorkspaceSend(
   const path = expandUrlTemplate(
     "/{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2024-07-01-preview",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -195,10 +177,7 @@ export function _getWorkspaceSend(
     .path(path)
     .get({
       ...operationOptionsToRequestParameters(options),
-      headers: {
-        accept: "application/json",
-        ...options.requestOptions?.headers,
-      },
+      headers: { accept: "application/json", ...options.requestOptions?.headers },
     });
 }
 

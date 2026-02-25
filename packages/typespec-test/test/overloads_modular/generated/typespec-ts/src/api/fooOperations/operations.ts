@@ -22,7 +22,7 @@ export function _getAvatarAsJpegSend(
   const path = expandUrlTemplate(
     "/avatar{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2022-08-30",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -37,9 +37,7 @@ export function _getAvatarAsJpegSend(
     });
 }
 
-export async function _getAvatarAsJpegDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _getAvatarAsJpegDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);
@@ -66,7 +64,7 @@ export function _getAvatarAsPngSend(
   const path = expandUrlTemplate(
     "/avatar{?api%2Dversion}",
     {
-      "api%2Dversion": context.apiVersion,
+      "api%2Dversion": context.apiVersion ?? "2022-08-30",
     },
     {
       allowReserved: options?.requestOptions?.skipUrlEncoding,
@@ -81,9 +79,7 @@ export function _getAvatarAsPngSend(
     });
 }
 
-export async function _getAvatarAsPngDeserialize(
-  result: PathUncheckedResponse,
-): Promise<void> {
+export async function _getAvatarAsPngDeserialize(result: PathUncheckedResponse): Promise<void> {
   const expectedStatuses = ["204"];
   if (!expectedStatuses.includes(result.status)) {
     throw createRestError(result);

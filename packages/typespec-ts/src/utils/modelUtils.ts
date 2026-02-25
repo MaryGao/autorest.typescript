@@ -232,10 +232,7 @@ export function getSchemaForType(
         });
         schema.type = "object";
       }
-    } else if (
-      !isArrayModelType(program, type) &&
-      !isRecordModelType(program, type)
-    ) {
+    } else if (!isArrayModelType(type) && !isRecordModelType(type)) {
       if (usage && usage.includes(SchemaContext.Output)) {
         schema.outputTypeName = `${schema.name}Output`;
       }
@@ -267,6 +264,9 @@ export function getSchemaForType(
   }
   if (isNullType(type)) {
     return { name: "null", type: "null" };
+  }
+  if (type.kind === "Intrinsic" && type.name === "void") {
+    return { name: "void", type: "void" };
   }
   reportDiagnostic(program, {
     code: "invalid-schema",
@@ -656,7 +656,7 @@ function getSchemaForModel(
     isRequestBody,
     mediaTypes: contentTypes
   } = options ?? {};
-  if (isArrayModelType(dpgContext.program, model)) {
+  if (isArrayModelType(model)) {
     return getSchemaForArrayModel(dpgContext, model, options);
   }
 
@@ -677,7 +677,7 @@ function getSchemaForModel(
     true /** shouldGuard */
   );
 
-  if (model.name === "Record" && isRecordModelType(program, model)) {
+  if (model.name === "Record" && isRecordModelType(model)) {
     return getSchemaForRecordModel(dpgContext, model, { usage });
   }
   modelSchema.typeName = modelSchema.name;
@@ -745,7 +745,7 @@ function getSchemaForModel(
   if (needRef) {
     return modelSchema;
   }
-  if (isRecordModelType(program, model)) {
+  if (isRecordModelType(model)) {
     modelSchema.parents = {
       all: [getSchemaForRecordModel(dpgContext, model, { usage })],
       immediate: [getSchemaForRecordModel(dpgContext, model, { usage })]
@@ -1110,7 +1110,7 @@ function getSchemaForArrayModel(
   if (!indexer) {
     return schema;
   }
-  if (isArrayModelType(program, type)) {
+  if (isArrayModelType(type)) {
     schema = {
       type: "array",
       items: getSchemaForType(dpgContext, indexer.value!, {
@@ -1184,7 +1184,7 @@ function getSchemaForArrayModel(
               .join(" | ");
           }
         }
-      } else if (schema.items.type.includes("|")) {
+      } else if (schema.items?.type?.includes("|")) {
         schema.typeName = `(${schema.items.type})[]`;
       } else {
         schema.typeName = `${schema.items.type}[]`;
@@ -1207,7 +1207,7 @@ function getSchemaForRecordModel(
   if (!indexer) {
     return schema;
   }
-  if (isRecordModelType(program, type)) {
+  if (isRecordModelType(type)) {
     const valueType = getSchemaForType(dpgContext, indexer?.value, {
       usage,
       needRef: !isAnonymousModelType(indexer.value)
@@ -1322,6 +1322,10 @@ function getSchemaForStdScalar(
       return applyIntrinsicDecorators(program, type, {
         type: "number",
         format: "safeint"
+      });
+    case "numeric":
+      return applyIntrinsicDecorators(program, type, {
+        type: "number"
       });
     case "uint8":
       return applyIntrinsicDecorators(program, type, {
@@ -1654,7 +1658,10 @@ export function predictDefaultValue(
     }
     return specificDefault;
   }
-  const serviceNamespace = getDefaultService(program)?.type;
+  const serviceNamespace = getDefaultService(
+    program,
+    dpgContext.rlcOptions?.isModularLibrary
+  )?.type;
   if (!serviceNamespace) {
     return;
   }
@@ -1665,7 +1672,10 @@ export function predictDefaultValue(
   return;
 }
 
-export function getDefaultService(program: Program): Service | undefined {
+export function getDefaultService(
+  program: Program,
+  isModularLibrary: boolean = true
+): Service | undefined {
   const services = listServices(program);
   if (!services || services.length === 0) {
     reportDiagnostic(program, {
@@ -1673,7 +1683,7 @@ export function getDefaultService(program: Program): Service | undefined {
       target: NoTarget
     });
   }
-  if (services.length > 1) {
+  if (services.length > 1 && !isModularLibrary) {
     reportDiagnostic(program, {
       code: "more-than-one-service",
       target: NoTarget
@@ -1688,8 +1698,12 @@ export function getDefaultApiVersionString(
   dpgContext: SdkContext
 ): string | undefined {
   const program = dpgContext.program;
-  return getDefaultService(program)
-    ? getDefaultApiVersion(dpgContext, getDefaultService(program)!.type)?.value
+  const isModularLibrary = dpgContext.rlcOptions?.isModularLibrary;
+  return getDefaultService(program, isModularLibrary)
+    ? getDefaultApiVersion(
+        dpgContext,
+        getDefaultService(program, isModularLibrary)!.type
+      )?.value
     : undefined;
 }
 
@@ -1915,10 +1929,7 @@ export function getCollectionFormat(
 ): string | undefined {
   const type = param.param;
   const encode = getEncode(context.program, param.param);
-  if (
-    type.type.kind === "Model" &&
-    isArrayModelType(context.program, type.type)
-  ) {
+  if (type.type.kind === "Model" && isArrayModelType(type.type)) {
     if (param.explode) {
       return "multi";
     }
